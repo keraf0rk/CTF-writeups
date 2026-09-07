@@ -1,0 +1,24 @@
+{
+  "case_id": "BG-IR-2026-0505",
+  "package": "BurhanGuild Loader Incident",
+  "host": "orion-lab",
+  "capture_window": "2026-05-05T11:05:00Z/2026-05-05T11:12:00Z",
+  "algorithm": "sha256",
+  "captures": {
+    "capture_7F3A.raw": "eb216eabf468b1ee1fa5733db2ee050a399ce3c55b79568de078d2f824971178",
+    "capture_2C91.raw": "b911346738e741bac62683b7d75966e420e74c52787749e6a656719b305fcee3",
+    "capture_A812.raw": "07ace96cfd89f07f68344d71f50dd72a24e85196aefbd5c81f59aa9701deca3b",
+    "capture_D044.raw": "a4dc518b8d87a4ce3ec683e6a55dac907639180efda35915d6ea0654e5f5bd6c",
+    "capture_91BE.raw": "686f1695998b3f770428e771b1cc424074e248c81fccc52ce06504c3c885d47f"
+  },
+  "deleted_pages": {
+    "page_00.bin": "2b2f7f20479c811d8fb32a3d90e611e0888899d0873218209fdc824722b069a0",
+    "page_01.bin": "19ce44065acb7b413da01df1d73e18e881e20d44401226a514f4b02188a1403a",
+    "page_02.bin": "7d1353591fc80f47cd91ba44697f635f18373383cc62fa53c6ffc024816223f1",
+    "page_03.bin": "78b40e6a2bd7578f2da2212ac0da19501063e82c75011f5942063661382b4e6f",
+    "page_04.bin": "c8e3a56c2fa72594ccda7ee1481d16e4913ab2c5b4a5dd17a2fc3486f745b713",
+    "page_05.bin": "1d44f3dfea57ec4fc85539824ca494e7280ab2df6841f2c9a2283d4581360980",
+    "page_06.bin": "c354217629ad602626ba3f3e46f496b192fae14a24186db749b141527b2c3b80",
+    "page_07.bin": "de09816892ed169904807313d17c0952c929e9b11428f1aeb0ed47b0ce3f0294"
+  }
+}
