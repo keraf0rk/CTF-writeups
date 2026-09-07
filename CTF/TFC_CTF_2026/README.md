@@ -45,7 +45,7 @@ The goal is not only to document the flag, but to explain **how** and **why** th
 ## 🎯 Flag format
 
 ```
-ozonctf{...}
+TFCCTF{...}
 ```
 
 ## 📚 Disclaimer
