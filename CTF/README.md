@@ -8,6 +8,7 @@ Writeups grouped by competition.
 | Event | Categories | Link |
 |-------|-----------|------|
 | **OzonQuiz** | 🔎 OSINT · 🧬 Forensics · 🖼️ Steganography | [→ OzonQuiz/](OzonQuiz/) |
+| **TFC-CTF-2026** | 🔐Cryptography | [→ TFC_CTF_2026/](TFC_CTF_2026/) |
 
 ---
 
@@ -21,3 +22,4 @@ Writeups grouped by competition.
 | Событие | Категории | Ссылка |
 |---------|-----------|--------|
 | **OzonQuiz** | 🔎 OSINT · 🧬 Форензика · 🖼️ Стеганография | [→ OzonQuiz/](OzonQuiz/) |
+| **TFC-CTF-2026** | 🔐Криптография | [→ TFC_CTF_2026/](TFC_CTF_2026/) |
