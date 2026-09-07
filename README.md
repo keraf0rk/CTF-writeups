@@ -14,7 +14,7 @@
 | Event | Categories | Writeups |
 |-------|-----------|----------|
 | [**OzonQuiz**](CTF/OzonQuiz/) | 🔎 OSINT · 🧬 Forensics · 🖼️ Stego | 5 tasks |
-| [**TFC_CTF_2026**](CTF/TFC_CTF_2026/) | 🔐 Crypto | 1 tasks |
+| [**TFC_CTF_2026**](CTF/TFC_CTF_2026/) | 🔐 Crypto | 1 task |
 
 > New competitions are added as folders under [`CTF/`](CTF/) — each with its own writeups.
 
