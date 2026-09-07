@@ -11,33 +11,33 @@
 
 ## 🏁 Events
 
-| Event | Category mix | Writeups |
-|-------|--------------|----------|
-| [**OzonQuiz**](CTF/OzonQuiz/) | OSINT · Forensics · Steganography | 5 tasks |
+| Event | Categories | Writeups |
+|-------|-----------|----------|
+| [**OzonQuiz**](CTF/OzonQuiz/) | 🔎 OSINT · 🧬 Forensics · 🖼️ Stego | 5 tasks |
 
-## 📂 Structure
+> New competitions are added as folders under [`CTF/`](CTF/) — each with its own writeups.
+
+## 📂 Layout
 
 ```
 CTF/
-└── OzonQuiz/
-    ├── 01-Osint       — Gosha's Calendar
-    ├── 02-Forensic    — The Courier's Browser
-    ├── 03-Stego       — Space Noise
-    ├── 04-Osint       — Millennium Goose
-    └── 05-Stego       — The Coffee-Machine Call
+└── <event>/            # one folder per competition
+    ├── README.md       # event index
+    └── <NN-Category>/  # one folder per task
+        ├── README.md   # the writeup
+        └── solve.*     # the solve script
 ```
 
-Each task folder holds its **writeup** (`README.md`) and its **solve script**.
+## 🧠 What's in each writeup
 
-## 🎯 Flag format
-
-```
-ozonctf{...}
-```
+Description · initial analysis · investigation path · tools & commands ·
+step-by-step solution · flag · key takeaways. The goal is to explain **how**
+and **why** each solution works, not just to record the flag.
 
 ## 📚 Disclaimer
 
-Published for **educational purposes**. All work was done against CTF infrastructure or provided challenge files.
+Published for **educational purposes**. All work was done against CTF
+infrastructure or provided challenge files.
 
 ---
 
@@ -56,28 +56,28 @@ Published for **educational purposes**. All work was done against CTF infrastruc
 
 | Событие | Категории | Разборы |
 |---------|-----------|---------|
-| [**OzonQuiz**](CTF/OzonQuiz/) | OSINT · Форензика · Стеганография | 5 заданий |
+| [**OzonQuiz**](CTF/OzonQuiz/) | 🔎 OSINT · 🧬 Форензика · 🖼️ Стего | 5 заданий |
+
+> Новые соревнования добавляются папками внутри [`CTF/`](CTF/) — у каждого свои разборы.
 
 ## 📂 Структура
 
 ```
 CTF/
-└── OzonQuiz/
-    ├── 01-Osint       — Календарь Гоши
-    ├── 02-Forensic    — Браузер курьера
-    ├── 03-Stego       — Космический шум
-    ├── 04-Osint       — Миллениум Гусь
-    └── 05-Stego       — Звонок про кофемашины
+└── <событие>/          # по папке на соревнование
+    ├── README.md       # индекс события
+    └── <NN-Категория>/ # по папке на задание
+        ├── README.md   # разбор
+        └── solve.*     # solve-скрипт
 ```
 
-В папке каждого задания лежат **разбор** (`README.md`) и **solve-скрипт**.
+## 🧠 Что в каждом разборе
 
-## 🎯 Формат флага
-
-```
-ozonctf{...}
-```
+Условие · первичный анализ · путь исследования · инструменты и команды ·
+пошаговое решение · флаг · ключевые выводы. Цель — объяснить, **как** и
+**почему** работает решение, а не просто зафиксировать флаг.
 
 ## 📚 Дисклеймер
 
-Опубликовано в **образовательных целях**. Вся работа выполнялась на инфраструктуре CTF или на выданных файлах заданий.
+Опубликовано в **образовательных целях**. Вся работа выполнялась на
+инфраструктуре CTF или на выданных файлах заданий.
