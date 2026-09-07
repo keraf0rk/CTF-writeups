@@ -14,7 +14,7 @@
 
 | #  | Challenge | Category | Status |
 |----|-----------|----------|:------:|
-| 01 | [MATH OR METH?](01-MATH OR METH?/)         | 🔐 Cryptography        | ✅ |
+| 01 | [MATH OR METH?](01-MATH-OR-METH?/)         | 🔐 Cryptography        | ✅ |
 
 > 🚧 = work in progress/stop · ✅ = solved
 > Each challenge folder contains its **writeup** (`README.md`) and its **solve script**.
@@ -40,7 +40,7 @@ The goal is not only to document the flag, but to explain **how** and **why** th
 
 ## 🛠️ Tools
 
-
+`Python` · `fpylll (LLL/BKZ)` · `numpy` · `pycryptodome` · `loguru`
 
 ## 🎯 Flag format
 
@@ -69,7 +69,7 @@ All testing was performed against CTF infrastructure or provided challenge files
 
 | #  | Задание | Категория | Статус |
 |----|---------|-----------|:------:|
-| 01 | [MATH OR METH?](01-MATH OR METH?/)         | 🔐 Криптография | ✅ |
+| 01 | [MATH OR METH?](01-MATH-OR-METH?/)         | 🔐 Криптография | ✅ |
 
 ## 🧠 Подход
 
@@ -88,6 +88,7 @@ All testing was performed against CTF infrastructure or provided challenge files
 
 ## 🛠️ Инструменты
 
+`Python` · `fpylll (LLL/BKZ)` · `numpy` · `pycryptodome` · `loguru`
 
 ## 🎯 Формат флага
 
