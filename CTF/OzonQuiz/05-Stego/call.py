@@ -18,7 +18,7 @@
 
 Флаг: ozonctf{S3CR3T_CH4NN31}   (вариант с L как буква: ozonctf{S3CR3T_CH4NN3L})
 
-Запуск:  python3 solve_dtmf.py Task_5.wav
+Запуск:  python3 call.py Task_5.wav
 Зависимости: numpy, scipy
 """
 from __future__ import annotations

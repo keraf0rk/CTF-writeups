@@ -11,7 +11,7 @@
     S3CR3TD3L1V3RYM3SS4G3   (SECRET DELIVERY MESSAGE, leet)
 
 Флаг: ozonctf{S3CR3TD3L1V3RYM3SS4G3}
-Запуск:  python3 solve_morse.py task.wav
+Запуск:  python3 flag_s.py task.wav
 """
 
 from __future__ import annotations

@@ -41,7 +41,7 @@ So `6×3 = O`, `9×4 = Z`, `7×4 = S`, `4×2 = H`, …
 reject speech/keyboard, plus per-letter tap counting via envelope peaks of the two tones.
 
 ```bash
-python3 ./solve_dtmf.py Task_5.wav
+python3 ./call.py Task_5.wav
 ```
 
 ## 5. Step-by-step
@@ -119,7 +119,7 @@ ozonctf{S3CR3T_CH4NN31}
 речь/клавиатуру) + точный подсчёт тапов по пикам огибающей двух тонов.
 
 ```bash
-python3 ./solve_dtmf.py Task_5.wav
+python3 ./call.py Task_5.wav
 ```
 
 ## 5. Пошаговое решение

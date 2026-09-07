@@ -38,7 +38,7 @@ cancels and a clean hidden signal remains. Discrete tonal bursts in 0–4 kHz (�
 ## 5. Step-by-step
 
 ```bash
-python3 ./solve_morse.py task.wav
+python3 ./flag_s.py task.wav
 # Морзе-сообщение: S3CR3TD3L1V3RYM3SS4G3
 # Флаг: ozonctf{S3CR3TD3L1V3RYM3SS4G3}
 ```
@@ -100,7 +100,7 @@ sox task.wav -n spectrogram -o spec.png     # только шум
 ## 5. Пошаговое решение
 
 ```bash
-python3 ./solve_morse.py task.wav
+python3 ./flag_s.py task.wav
 # Морзе-сообщение: S3CR3TD3L1V3RYM3SS4G3
 # Флаг: ozonctf{S3CR3TD3L1V3RYM3SS4G3}
 ```

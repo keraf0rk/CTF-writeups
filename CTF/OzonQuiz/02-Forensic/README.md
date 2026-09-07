@@ -62,10 +62,10 @@ input=ozonctf%7B34s4_br0w33r_h1st0ry_l00kup_ab3faccd1%7D
 
 ## 6. Solution
 
-Automated: [`./solve.sh`](./solve.sh)
+Automated: [`./find_flag.sh`](./find_flag.sh)
 
 ```bash
-./solve.sh task_2.rar
+./find_flag.sh task_2.rar
 ```
 
 ## 7. Flag
@@ -148,10 +148,10 @@ input=ozonctf%7B34s4_br0w33r_h1st0ry_l00kup_ab3faccd1%7D
 
 ## 6. Итоговое решение
 
-Автоматизация: [`./solve.sh`](./solve.sh)
+Автоматизация: [`./find_flag.sh`](./find_flag.sh)
 
 ```bash
-./solve.sh task_2.rar
+./find_flag.sh task_2.rar
 ```
 
 ## 7. Флаг
