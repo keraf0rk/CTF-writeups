@@ -10,6 +10,7 @@ Writeups grouped by competition.
 | **OzonQuiz** | 🔎 OSINT · 🧬 Forensics · 🖼️ Steganography | [→ OzonQuiz/](OzonQuiz/) |
 | **TFC-CTF-2026** | 🔐Cryptography | [→ TFC_CTF_2026/](TFC_CTF_2026/) |
 | **COMPFEST-2026** | 🧬 Forensic | [→ COMPFEST-CTF/](COMPFEST-CTF/) |
+| **THJCC-2026** | 🌐 Web · 🧬 Forensics · 🔧 Reverse | [→ THJCC-2026/](THJCC-2026/) |
 
 ---
 
@@ -25,3 +26,4 @@ Writeups grouped by competition.
 | **OzonQuiz** | 🔎 OSINT · 🧬 Форензика · 🖼️ Стеганография | [→ OzonQuiz/](OzonQuiz/) |
 | **TFC-CTF-2026** | 🔐Криптография | [→ TFC_CTF_2026/](TFC_CTF_2026/) |
 | **COMPFEST-2026** | 🧬 Форензика| [→ COMPFEST-CTF/](COMPFEST-CTF/) |
+| **THJCC-2026** | 🌐 Веб · 🧬 Форензика · 🔧 Reverse | [→ THJCC-2026/](THJCC-2026/) |

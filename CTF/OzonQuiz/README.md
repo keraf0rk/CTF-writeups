@@ -17,7 +17,7 @@
 | 01 | [Gosha's Calendar](01-Osint/)         | 🔎 OSINT         | ✅ |
 | 02 | [The Courier's Browser](02-Forensic/) | 🧬 Forensics     | ✅ |
 | 03 | [Space Noise](03-Stego/)              | 🖼️ Steganography | ✅ |
-| 04 | [Millennium Goose](04-Osint/)         | 🔎 OSINT         | 🚧 |
+| 04 | [Millennium Goose](04-Osint/)         | 🔎 OSINT         | ✅ |
 | 05 | [The Coffee-Machine Call](05-Stego/)  | 🖼️ Steganography | ✅ |
 
 > 🚧 = work in progress/stop · ✅ = solved
@@ -83,7 +83,7 @@ All testing was performed against CTF infrastructure or provided challenge files
 | 01 | [Календарь Гоши](01-Osint/)          | 🔎 OSINT         | ✅ |
 | 02 | [Браузер курьера](02-Forensic/)      | 🧬 Форензика     | ✅ |
 | 03 | [Космический шум](03-Stego/)         | 🖼️ Стеганография | ✅ |
-| 04 | [Миллениум Гусь](04-Osint/)          | 🔎 OSINT         | 🚧 |
+| 04 | [Миллениум Гусь](04-Osint/)          | 🔎 OSINT         | ✅ |
 | 05 | [Звонок про кофемашины](05-Stego/)   | 🖼️ Стеганография | ✅ |
 
 > 🚧 = в работе/стоп · ✅ = решено

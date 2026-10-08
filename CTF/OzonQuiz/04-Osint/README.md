@@ -7,11 +7,13 @@
 |---|---|
 | **Category** | 🔎 OSINT (+ light stego) |
 | **Challenge file** | `plain.png` (561×376) |
-| **Status** | 🚧 Unsolved (flag not accepted) |
-| **Flag** | _not confirmed — see step 7_ |
+| **Status** | ✅ Solved |
+| **Flag** | `ozonctf{55.236_79.758}` |
 
-Technique & location are certain (Ural Airlines A321 **VQ-BOZ**, Flight 178 landing site), but
-**no coordinate variant was accepted** by the scorebot — the expected value/format is still open.
+**Accepted flag:** `ozonctf{55.236_79.758}`. ⚠️ Note: this point (**55.236, 79.758**) does **not**
+match the Ural Airlines Flight 178 landing site near Zhukovsky described in steps 2–6 — that
+geolocation was the original (wrong) lead. The investigation is kept as a record; the derivation
+of the accepted coordinates is not reconstructed here.
 
 ## 1. Description
 
@@ -52,10 +54,14 @@ python3 ./solve_reconstruct.py plain.png   # -> recon.png
 
 The disappeared "starship" = Ural Airlines A321 **VQ-BOZ** that force-landed near Zhukovsky.
 
-## 7. Flag — 🚧 not confirmed
+## 7. Flag
 
-The location is certain (Flight 178 landing site), but **none of the submitted coordinate variants
-were accepted**:
+```
+ozonctf{55.236_79.758}
+```
+
+Accepted by the scorebot. The answer is the point **55.236, 79.758**; the earlier
+Zhukovsky-based guesses were all rejected:
 
 | Tried | Verdict |
 |---|---|
@@ -63,10 +69,8 @@ were accepted**:
 | `ozonctf{55.512_38.252}` | "close" |
 | `ozonctf{55.510_38.253}` | not accepted |
 
-Team feedback pointed to the coordinates being "just wrong". Open hypotheses for the exact answer:
-the point the challenge author actually used may differ (e.g. the **field-centre pin** vs. the
-Wikipedia article coordinate), a different **precision/rounding**, or **lat/lon order swapped**.
-Needs the exact source POI to lock the flag.
+The accepted point differs substantially from the Flight 178 site, so steps 5–6 (Zhukovsky)
+are an incorrect lead and should be revisited against the real source.
 
 ## 8. Key takeaways
 
@@ -87,11 +91,13 @@ Needs the exact source POI to lock the flag.
 |---|---|
 | **Категория** | 🔎 OSINT (+ лёгкое стего) |
 | **Файл задания** | `plain.png` (561×376) |
-| **Статус** | 🚧 Не решено (флаг не принят) |
-| **Флаг** | _не подтверждён — см. п. 7_ |
+| **Статус** | ✅ Решено |
+| **Флаг** | `ozonctf{55.236_79.758}` |
 
-Техника и локация установлены однозначно (A321 «Уральских авиалиний» **VQ-BOZ**, место посадки
-рейса 178), но **ни один вариант координат не принят** ботом — точное значение/формат пока открыты.
+**Принятый флаг:** `ozonctf{55.236_79.758}`. ⚠️ Важно: эта точка (**55.236, 79.758**) **не**
+совпадает с местом посадки рейса 178 под Жуковским из пп. 2–6 — та геолокация была первоначальной
+(неверной) версией. Разбор оставлен как запись хода; обоснование принятых координат здесь не
+восстановлено.
 
 ## 1. Условие
 
@@ -132,12 +138,29 @@ python3 ./solve_reconstruct.py plain.png   # -> recon.png
 
 Пропавший «звездолёт» = A321 «Уральских авиалиний» **VQ-BOZ**, севший в поле под Жуковским.
 
-## 7. Флаг — 🚧 не подтверждён
+## 7. Флаг
 
-Локация установлена точно (место посадки рейса 178), но **ни один вариант координат не принят**:
+```
+ozonctf{55.236_79.758}
+```
+
+Принят ботом. Правильный ответ — координаты **55.236, 79.758**; прежние догадки на базе Жуковского
+были отклонены:
 
 | Пробовали | Вердикт |
 |---|---|
 | `ozonctf{55.511_38.253}` | «Близко, но не совсем» |
 | `ozonctf{55.512_38.252}` | «Близко» |
 | `ozonctf{55.510_38.253}` | не принят |
+
+Принятая точка далеко от места рейса 178, поэтому пп. 5–6 (Жуковский) — ошибочный след,
+их нужно пересмотреть по реальному источнику.
+
+## 8. Ключевые выводы
+
+- «Тёмный полосатый PNG» ⇒ сначала проверяй **строчную структуру** (стёртые/чередующиеся строки),
+  а не LSB-инструменты.
+- OSINT по самолётам: ливрея → авиакомпания, затем **категории Wikimedia Commons по регистрации**
+  связывают фото с конкретным бортом.
+- Координатный флаг: итог сверяется по принятому ответу, а не по «красивой» версии — здесь
+  первоначальная геолокация оказалась неверной, принятая точка иная (**55.236, 79.758**).
