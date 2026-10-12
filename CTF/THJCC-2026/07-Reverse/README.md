@@ -34,7 +34,7 @@ strings -n 5 xorlock  # "access denied"
 
 ## 3. Investigation path
 
-**Confirmed**
+**What I confirmed**
 
 - `0x2011BA` requires `strlen == 20`.
 - The comparison loop at `0x2011D0` is four instructions long:
@@ -54,10 +54,11 @@ cmp   sil, dil
   `0x200170` — rolling XOR, seed `0x40`, step `0x1A`, even byte of each pair
   against `key - 0x0D`, 31 bytes — exactly as in the sibling challenges.
 
-**Key insight**
+**The insight that solved it**
 
-- A position-dependent XOR is still a closed-form bijection. The `+ 3*i` term
-  only *looks* like it adds strength; subtracting it back costs one line.
+- I saw that a position-dependent XOR is still a closed-form bijection. The
+  `+ 3*i` term only *looks* like it adds strength; subtracting it back cost me
+  one line.
 
 ## 4. Tools & commands
 
@@ -81,13 +82,14 @@ See [`solve.py`](solve.py).
 
 ## 5. Step-by-step
 
-1. `file` / `readelf` → 1256-byte static stripped ELF, `.rodata` + `.text`.
-2. Disassemble all `0x1D3` bytes of `.text`.
-3. Read `0x2011BA` → the password is exactly 20 characters.
-4. Read the loop at `0x2011D0` → `((p[i] ^ 0x5A) + 3*i) & 0xFF == table[i]`.
-5. Invert against the table at VA `0x200150` → `xor_me_if_you_can_26`.
-6. Replay the forward check to confirm the inversion.
-7. Decode the `.rodata` blob at VA `0x200170` (seed `0x40`) → the flag.
+1. `file` / `readelf` showed a 1256-byte static stripped ELF, `.rodata` +
+   `.text`.
+2. I disassembled all `0x1D3` bytes of `.text`.
+3. I read `0x2011BA` → the password is exactly 20 characters.
+4. I read the loop at `0x2011D0` → `((p[i] ^ 0x5A) + 3*i) & 0xFF == table[i]`.
+5. I inverted it against the table at VA `0x200150` → `xor_me_if_you_can_26`.
+6. I replayed the forward check to confirm the inversion.
+7. I decoded the `.rodata` blob at VA `0x200170` (seed `0x40`) → the flag.
 
 ## 6. Solution
 
@@ -113,10 +115,10 @@ THJCC{xor_basics_are_not_magic}
   invertible in closed form. No search, no solver.
 - **Why it worked:** inverting is two lines, and replaying the original direction
   on the recovered password removes any doubt about sign/mask/order mistakes.
-- **False leads:** none worth the name here — but note the password is *not* the
-  goal. As in [`05-Reverse`](../05-Reverse/) the flag is a constant blob; the
-  password only gates the print.
-- **Recognize it next time:** tiny static ELF + `access denied` + a `.rodata`
+- **Worth noting:** the password is *not* the goal. As in
+  [`05-Reverse`](../05-Reverse/) the flag is a constant blob; the password only
+  gates the print.
+- **What I'll remember:** tiny static ELF + `access denied` + a `.rodata`
   table the same length as the expected input → invert the loop directly, then
   look for a second blob of flag length nearby. Across this author the flag
   decoder is always the same rolling XOR with step `0x1A`; only the seed changes
@@ -160,7 +162,7 @@ strings -n 5 xorlock  # "access denied"
 
 ## 3. Путь исследования
 
-**Подтверждено**
+**Что я подтвердил**
 
 - По адресу `0x2011BA` требуется `strlen == 20`.
 - Цикл сравнения `0x2011D0` состоит из четырёх инструкций:
@@ -180,11 +182,11 @@ cmp   sil, dil
   `0x200170` — бегущий XOR, старт `0x40`, шаг `0x1A`, чётный байт пары против
   `key - 0x0D`, 31 байт — ровно как в соседних заданиях.
 
-**Ключевая идея**
+**Идея, которая решила задачу**
 
-- Позиционно-зависимый XOR всё равно остаётся биекцией в замкнутой форме.
-  Слагаемое `+ 3*i` лишь *выглядит* как усиление; вычесть его обратно — одна
-  строка.
+- Я увидел, что позиционно-зависимый XOR всё равно остаётся биекцией в замкнутой
+  форме. Слагаемое `+ 3*i` лишь *выглядит* как усиление; вычесть его обратно мне
+  стоило одной строки.
 
 ## 4. Инструменты и команды
 
@@ -208,13 +210,14 @@ python3 solve.py
 
 ## 5. Пошаговое решение
 
-1. `file` / `readelf` → статический stripped ELF на 1256 байт, `.rodata` + `.text`.
-2. Дизассемблируем все `0x1D3` байта `.text`.
-3. Читаем `0x2011BA` → пароль ровно 20 символов.
-4. Читаем цикл `0x2011D0` → `((p[i] ^ 0x5A) + 3*i) & 0xFF == table[i]`.
-5. Обращаем относительно таблицы по VA `0x200150` → `xor_me_if_you_can_26`.
-6. Прогоняем прямую проверку, чтобы подтвердить обращение.
-7. Декодируем блоб `.rodata` по VA `0x200170` (старт `0x40`) → флаг.
+1. `file` / `readelf` показали статический stripped ELF на 1256 байт, `.rodata`
+   + `.text`.
+2. Дизассемблировал все `0x1D3` байта `.text`.
+3. Прочитал `0x2011BA` → пароль ровно 20 символов.
+4. Прочитал цикл `0x2011D0` → `((p[i] ^ 0x5A) + 3*i) & 0xFF == table[i]`.
+5. Обратил относительно таблицы по VA `0x200150` → `xor_me_if_you_can_26`.
+6. Прогнал прямую проверку, чтобы подтвердить обращение.
+7. Декодировал блоб `.rodata` по VA `0x200170` (старт `0x40`) → флаг.
 
 ## 6. Итоговое решение
 
@@ -241,10 +244,10 @@ THJCC{xor_basics_are_not_magic}
 - **Почему сработало:** обращение занимает две строки, а прогон исходного
   направления на восстановленном пароле снимает сомнения насчёт ошибок в знаке,
   маске и порядке.
-- **Ложные следы:** здесь настоящих не было — но стоит отметить, что пароль *не*
-  является целью. Как и в [`05-Reverse`](../05-Reverse/), флаг — константный
-  блоб, а пароль лишь открывает печать.
-- **Как узнать в следующий раз:** крошечный статический ELF + `access denied` +
+- **Стоит отметить:** пароль *не* является целью. Как и в
+  [`05-Reverse`](../05-Reverse/), флаг — константный блоб, а пароль лишь
+  открывает печать.
+- **Что запомню:** крошечный статический ELF + `access denied` +
   таблица в `.rodata` длиной с ожидаемый ввод → обращайте цикл напрямую, затем
   ищите рядом второй блоб длиной с флаг. У этого автора декодер флага всегда один
   и тот же бегущий XOR с шагом `0x1A`; меняется только стартовый байт

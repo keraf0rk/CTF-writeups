@@ -18,19 +18,19 @@
 
 ## 2. Initial analysis
 
-`task_2.rar` is a dump of a **Yandex Browser** profile (`Default/…`: `History`, `Login Data`,
-`Ya Passman Data`, `Cache`, `Local Storage`, `Sessions`, …).
+`task_2.rar` turned out to be a dump of a **Yandex Browser** profile (`Default/…`: `History`,
+`Login Data`, `Ya Passman Data`, `Cache`, `Local Storage`, `Sessions`, …).
 
 ```bash
 file task_2.rar          # RAR archive data, v5
 ```
 
-RAR5 — `7z` fails on many files with `Unsupported Method`, so use the real `unrar`.
+It is RAR5, and `7z` failed on many files with `Unsupported Method`, so I used the real `unrar`.
 
 ## 3. Investigation path
 
-A browser dump → the courier's **intentions** are most likely in his **browsing history** and
-associated key-value stores. Grep everything for the flag format.
+With a browser dump, I reckoned the courier's **intentions** would be in his **browsing history**
+and the associated key-value stores, so I grepped everything for the flag format.
 
 ## 4. Tools & commands
 
@@ -45,13 +45,13 @@ grep -rialE "ozonctf|flag\{" .
 
 ## 5. Step-by-step
 
-Pull the flag string out of `History`:
+I pulled the flag string out of `History`:
 
 ```bash
 strings -n 5 "Default/History" | grep -iaE "ozonctf"
 ```
 
-The courier searched for the flag (URL-encoded) — both on ozon.ru and through a URL-decode tool:
+The courier had searched for the flag (URL-encoded) — both on ozon.ru and through a URL-decode tool:
 
 ```
 https://www.ozon.ru/search/?text=ozonctf%257B34s4_br0w33r_h1st0ry_l00kup_ab3faccd1%257D
@@ -76,11 +76,11 @@ ozonctf{34s4_br0w33r_h1st0ry_l00kup_ab3faccd1}
 
 ## 8. Key takeaways
 
-- RAR5 dumps: prefer `unrar` over `7z` (which chokes on `Unsupported Method`).
+- RAR5 dumps: I reach for `unrar` over `7z` (which chokes on `Unsupported Method`).
 - Browser artifacts (`History`, `Local Storage`, `Session Storage`, `Sessions`) are gold for
-  forensics — one recursive `grep` for the flag format saves a lot of time.
-- Watch for decoys: a bare `ozonctf` search without braces was present; the real flag was the
-  neighbouring URL-encoded entry with `{}`.
+  forensics — one recursive `grep` for the flag format saved me a lot of time.
+- I watched for decoys: a bare `ozonctf` search without braces was present, but the real flag was
+  the neighbouring URL-encoded entry with `{}`.
 
 ---
 
@@ -104,19 +104,19 @@ ozonctf{34s4_br0w33r_h1st0ry_l00kup_ab3faccd1}
 
 ## 2. Первичный анализ
 
-`task_2.rar` — выгрузка профиля **Yandex Browser** (`Default/…`: `History`, `Login Data`,
+`task_2.rar` оказался выгрузкой профиля **Yandex Browser** (`Default/…`: `History`, `Login Data`,
 `Ya Passman Data`, `Cache`, `Local Storage`, `Sessions`, …).
 
 ```bash
 file task_2.rar          # RAR archive data, v5
 ```
 
-Это **RAR5** — `7z` спотыкается на части файлов (`Unsupported Method`), поэтому берём `unrar`.
+Это **RAR5**, и `7z` споткнулся на части файлов (`Unsupported Method`), поэтому я взял `unrar`.
 
 ## 3. Путь исследования
 
-Дамп браузера → намерения курьера логично искать в **истории** и связанных key-value хранилищах.
-Грепаем всё по формату флага.
+С дампом браузера я решил, что намерения курьера будут в **истории** и связанных key-value
+хранилищах, поэтому прогрепал всё по формату флага.
 
 ## 4. Инструменты и команды
 
@@ -131,7 +131,7 @@ grep -rialE "ozonctf|flag\{" .
 
 ## 5. Пошаговое решение
 
-Достаём строку флага из `History`:
+Достал строку флага из `History`:
 
 ```bash
 strings -n 5 "Default/History" | grep -iaE "ozonctf"
@@ -162,8 +162,8 @@ ozonctf{34s4_br0w33r_h1st0ry_l00kup_ab3faccd1}
 
 ## 8. Ключевые выводы
 
-- RAR5-дампы: `unrar` вместо `7z` (тот падает на `Unsupported Method`).
+- RAR5-дампы: я беру `unrar` вместо `7z` (тот падает на `Unsupported Method`).
 - Артефакты браузера (`History`, `Local Storage`, `Session Storage`, `Sessions`) — золото для
-  форензики; один рекурсивный `grep` по формату флага экономит время.
-- Осторожно с приманками: голый запрос `ozonctf` без скобок был; реальный флаг — соседняя
+  форензики; один рекурсивный `grep` по формату флага сэкономил мне время.
+- Я следил за приманками: голый запрос `ozonctf` без скобок был, но реальный флаг — соседняя
   URL-encoded запись с `{}`.

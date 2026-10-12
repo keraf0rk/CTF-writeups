@@ -19,7 +19,7 @@ Metadata: `artist=OzonCTF`, `title=Space Noise`, `genre=Space Voices`.
 
 ## 2. Initial analysis
 
-Full and per-channel spectrograms show only a broadband noise **cover** (the "breathing"). No visible text.
+My full and per-channel spectrograms showed only a broadband noise **cover** (the "breathing") — no visible text.
 
 ```bash
 sox task.wav -n spectrogram -o spec.png     # noise only
@@ -27,13 +27,14 @@ sox task.wav -n spectrogram -o spec.png     # noise only
 
 ## 3. Investigation path
 
-The file is **stereo**. Take the channel difference **L − R** — the common (mono-like) cover
-cancels and a clean hidden signal remains. Discrete tonal bursts in 0–4 kHz (≈ 6–37.5 s) → **Morse**.
+The file is **stereo**, so I took the channel difference **L − R** — the common (mono-like) cover
+cancelled and a clean hidden signal remained. I saw discrete tonal bursts in 0–4 kHz
+(≈ 6–37.5 s) → **Morse**.
 
 ## 4. Tools & commands
 
-`Python` (NumPy) · `SoX`. Envelope analysis gives two durations: **dot ≈ 124 ms**,
-**dash ≈ 363 ms** (exactly ×3). 80 symbols, decoded with zero errors.
+`Python` (NumPy) · `SoX`. My envelope analysis gave two durations: **dot ≈ 124 ms**,
+**dash ≈ 363 ms** (exactly ×3). 80 symbols, which I decoded with zero errors.
 
 ## 5. Step-by-step
 
@@ -55,8 +56,8 @@ ozonctf{S3CR3TD3L1V3RYM3SS4G3}
 
 ## 8. Key takeaways
 
-- Stereo challenge? Always check **L − R** (and L + R): a mono cover cancels and exposes the payload.
-- Two clean pulse lengths in a 1:3 ratio ⇒ Morse. Estimate the dot as the median short-burst length.
+- On a stereo challenge I always check **L − R** (and L + R): a mono cover cancels and exposes the payload.
+- Two clean pulse lengths in a 1:3 ratio meant Morse to me; I estimate the dot as the median short-burst length.
 
 ---
 
@@ -81,7 +82,7 @@ ozonctf{S3CR3TD3L1V3RYM3SS4G3}
 
 ## 2. Первичный анализ
 
-Полная и поканальная спектрограммы — только шумовой **cover** («дыхание»). Текста нет.
+Мои полная и поканальная спектрограммы показали только шумовой **cover** («дыхание») — текста нет.
 
 ```bash
 sox task.wav -n spectrogram -o spec.png     # только шум
@@ -89,13 +90,13 @@ sox task.wav -n spectrogram -o spec.png     # только шум
 
 ## 3. Путь исследования
 
-Файл **стерео**. Берём разность каналов **L − R** — общий (моно-подобный) cover вычитается,
-остаётся чистый сигнал: дискретные тональные всплески 0–4 кГц (≈ 6–37.5 c) → **Морзе**.
+Файл **стерео**, поэтому я взял разность каналов **L − R** — общий (моно-подобный) cover вычелся,
+остался чистый сигнал: я увидел дискретные тональные всплески 0–4 кГц (≈ 6–37.5 c) → **Морзе**.
 
 ## 4. Инструменты и команды
 
-`Python` (NumPy) · `SoX`. Анализ огибающей даёт две длительности: **точка ≈ 124 мс**,
-**тире ≈ 363 мс** (ровно ×3). 80 символов, декод без ошибок.
+`Python` (NumPy) · `SoX`. Мой анализ огибающей дал две длительности: **точка ≈ 124 мс**,
+**тире ≈ 363 мс** (ровно ×3). 80 символов, которые я декодировал без ошибок.
 
 ## 5. Пошаговое решение
 
@@ -117,5 +118,5 @@ ozonctf{S3CR3TD3L1V3RYM3SS4G3}
 
 ## 8. Ключевые выводы
 
-- Стерео-таск? Всегда проверяй **L − R** (и L + R): моно-cover вычитается и обнажает payload.
-- Две чистые длительности импульсов в отношении 1:3 ⇒ Морзе. Точку оцениваем как медиану коротких всплесков.
+- На стерео-таске я всегда проверяю **L − R** (и L + R): моно-cover вычитается и обнажает payload.
+- Две чистые длительности импульсов в отношении 1:3 для меня означали Морзе; точку я оцениваю как медиану коротких всплесков.

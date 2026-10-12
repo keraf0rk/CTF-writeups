@@ -26,8 +26,8 @@ curl -s http://chal.thjcc.org:31255/robots.txt # Disallow: /backup/
 - The page is ASP.NET and posts back with `__VIEWSTATE` (+ `__VIEWSTATEGENERATOR`).
 - `robots.txt` points at a `/backup/` directory.
 - A forged/garbage `__VIEWSTATE` is rejected — so **ViewState MAC is enabled**
-  (`EnableViewStateMac`). That means the server signs the ViewState and we need
-  the signing key to tamper with it.
+  (`EnableViewStateMac`). That told me the server signs the ViewState, so to
+  tamper with it I first needed the signing key.
 
 ## 3. Investigation path
 
@@ -43,11 +43,11 @@ curl -s http://chal.thjcc.org:31255/robots.txt # Disallow: /backup/
   20 bytes == SHA-1 digest length → the trailer is an HMAC-SHA1 MAC, and the
   state itself is **not encrypted**.
 
-**Hypothesis → verified**
+**What I confirmed next**
 
-- MAC == `HMAC-SHA1(validationKey, serialized_payload)`. Verified by recomputing
-  the MAC over the original payload with the leaked key and matching it byte for
-  byte against the trailer (see `solve.py`, `forge()` assertion).
+- The MAC is `HMAC-SHA1(validationKey, serialized_payload)`. I confirmed it by
+  recomputing the MAC over the original payload with the leaked key and matching
+  it byte for byte against the trailer (see `solve.py`, `forge()` assertion).
 
 ## 4. Tools & commands
 
@@ -65,20 +65,22 @@ python3 solve.py --submit   # forge + POST to the live target, extract flag
 
 ## 5. Step-by-step
 
-1. Pull `/backup/web.config~`, extract the hex `validationKey`.
-2. Grab a fresh `__VIEWSTATE` from `GET /Default.aspx`.
-3. Base64-decode it; split into `payload = raw[:-20]` and `sig = raw[-20:]`.
-4. Verify `HMAC_SHA1(key, payload) == sig` — proves the algorithm and the key.
-5. Rewrite the plaintext inside `payload`: `guest` → `admin` and
+1. I pulled `/backup/web.config~` and extracted the hex `validationKey`.
+2. I grabbed a fresh `__VIEWSTATE` from `GET /Default.aspx`.
+3. I base64-decoded it and split it into `payload = raw[:-20]` and
+   `sig = raw[-20:]`.
+4. I checked `HMAC_SHA1(key, payload) == sig`, which proved the algorithm and
+   the key.
+5. I rewrote the plaintext inside `payload`: `guest` → `admin` and
    `AST-0000000` → `AST-4F2A9C0`. Both edits are **length-preserving**, so the
-   serialized length prefixes stay valid and nothing else shifts.
-6. Recompute the MAC over the new payload, re-base64 `payload + new_mac`.
-7. POST the forged `__VIEWSTATE` back to `/Default.aspx` with
-   `--data-urlencode` (so `+` / `=` in the base64 survive).
+   serialized length prefixes stayed valid and nothing else shifted.
+6. I recomputed the MAC over the new payload and re-base64'd `payload + new_mac`.
+7. I POSTed the forged `__VIEWSTATE` back to `/Default.aspx` with
+   `--data-urlencode` (so the `+` / `=` in the base64 survive).
 
 ## 6. Solution
 
-The forged ViewState produced by `solve.py`:
+The forged ViewState I produced with `solve.py`:
 
 ```
 /wEMAQVhZG1pbgELQVNULTRGMkE5QzBF1lsA6BNCBNhd4CVDh7zJlLbvRg==
@@ -113,8 +115,9 @@ THJCC{f0rg3d_v13wst4t3_w1th_l34k3d_m4ch1n3k3y}
   owns the `validationKey` can forge arbitrary state. Default ASP.NET MAC here is
   plain `HMAC-SHA1(validationKey, payload)`.
 - **Length-preserving edits:** `guest`→`admin` and the two asset ids are the same
-  length, so we could byte-patch without touching the serialization format. If
-  lengths differed we'd have to fix the ViewState length prefixes too.
+  length, so I could byte-patch without touching the serialization format. If
+  the lengths had differed I would have had to fix the ViewState length prefixes
+  too.
 - **False leads:** trying to brute the MAC or attack the serialization — pointless
   once the key is in `web.config~`. Don't over-engineer; check backups first.
 - **Recognize it next time:** ASP.NET + `__VIEWSTATE` + an exposed backup dir is
@@ -151,8 +154,8 @@ curl -s http://chal.thjcc.org:31255/robots.txt # Disallow: /backup/
 - Это ASP.NET, postback идёт с `__VIEWSTATE` (+ `__VIEWSTATEGENERATOR`).
 - `robots.txt` указывает на каталог `/backup/`.
 - Подделанный/мусорный `__VIEWSTATE` отвергается → **включена MAC-проверка
-  ViewState** (`EnableViewStateMac`). Значит сервер подписывает ViewState, и для
-  подмены нужен ключ подписи.
+  ViewState** (`EnableViewStateMac`). Значит, сервер подписывает ViewState, и
+  для подмены мне сначала нужен был ключ подписи.
 
 ## 3. Путь исследования
 
@@ -169,11 +172,11 @@ curl -s http://chal.thjcc.org:31255/robots.txt # Disallow: /backup/
   20 байт == длина SHA-1 → хвост это HMAC-SHA1, а само состояние **не
   зашифровано**.
 
-**Гипотеза → проверена**
+**Что я подтвердил дальше**
 
-- MAC == `HMAC-SHA1(validationKey, serialized_payload)`. Проверено: пересчитали
-  MAC по исходному payload с утёкшим ключом и побайтово сравнили с хвостом
-  (см. `solve.py`, проверка в `forge()`).
+- MAC — это `HMAC-SHA1(validationKey, serialized_payload)`. Я подтвердил это:
+  пересчитал MAC по исходному payload с утёкшим ключом и побайтово сравнил с
+  хвостом (см. `solve.py`, проверка в `forge()`).
 
 ## 4. Инструменты и команды
 
@@ -191,20 +194,20 @@ python3 solve.py --submit   # подделка + POST на боевой тарг
 
 ## 5. Пошаговое решение
 
-1. Забрать `/backup/web.config~`, вытащить hex `validationKey`.
-2. Взять свежий `__VIEWSTATE` из `GET /Default.aspx`.
-3. Base64-декод; разбить на `payload = raw[:-20]` и `sig = raw[-20:]`.
-4. Проверить `HMAC_SHA1(key, payload) == sig` — подтверждает алгоритм и ключ.
-5. Переписать открытый текст в `payload`: `guest` → `admin` и
+1. Забрал `/backup/web.config~` и вытащил hex `validationKey`.
+2. Взял свежий `__VIEWSTATE` из `GET /Default.aspx`.
+3. Сделал base64-декод и разбил на `payload = raw[:-20]` и `sig = raw[-20:]`.
+4. Проверил `HMAC_SHA1(key, payload) == sig` — это подтвердило алгоритм и ключ.
+5. Переписал открытый текст в `payload`: `guest` → `admin` и
    `AST-0000000` → `AST-4F2A9C0`. Обе правки **сохраняют длину**, поэтому
-   префиксы длины в сериализации остаются валидными и ничего не «съезжает».
-6. Пересчитать MAC по новому payload, заново base64 от `payload + new_mac`.
-7. Отправить подделанный `__VIEWSTATE` на `/Default.aspx` через
+   префиксы длины в сериализации остались валидными и ничего не «съехало».
+6. Пересчитал MAC по новому payload и заново взял base64 от `payload + new_mac`.
+7. Отправил подделанный `__VIEWSTATE` на `/Default.aspx` через
    `--data-urlencode` (чтобы `+` / `=` в base64 не поломались).
 
 ## 6. Итоговое решение
 
-Подделанный ViewState из `solve.py`:
+Подделанный ViewState, который я получил через `solve.py`:
 
 ```
 /wEMAQVhZG1pbgELQVNULTRGMkE5QzBF1lsA6BNCBNhd4CVDh7zJlLbvRg==
@@ -239,8 +242,8 @@ THJCC{f0rg3d_v13wst4t3_w1th_l34k3d_m4ch1n3k3y}
   шифрования**, владелец `validationKey` подделывает любое состояние. Дефолтный
   MAC здесь — простой `HMAC-SHA1(validationKey, payload)`.
 - **Правки с сохранением длины:** `guest`→`admin` и оба id актива одной длины,
-  поэтому байт-патч не трогает формат сериализации. При разной длине пришлось бы
-  чинить ещё и префиксы длины в ViewState.
+  поэтому байт-патч не тронул формат сериализации. Будь длины разными, мне
+  пришлось бы чинить ещё и префиксы длины в ViewState.
 - **Ложные следы:** брутить MAC или атаковать сериализацию — бессмысленно, как
   только ключ лежит в `web.config~`. Не усложняй: сначала смотри бэкапы.
 - **Как узнать в следующий раз:** ASP.NET + `__VIEWSTATE` + открытый каталог

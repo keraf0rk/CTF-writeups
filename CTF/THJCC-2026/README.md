@@ -4,8 +4,8 @@
 <p align="center"><b>🇬🇧 English</b> · <a href="#ru">🇷🇺 Русский</a></p>
 
 <p align="center">
-  Writeups and solutions for <b>THJCC CTF 2026</b> challenges.<br>
-  Solved challenges with detailed explanations, methodology, commands and scripts.
+  My writeups for the <b>THJCC CTF 2026</b> challenges I solved.<br>
+  For each one I describe what I found, what I did and why it worked — with the commands and scripts I used.
 </p>
 
 ---
@@ -37,7 +37,7 @@
 
 ## 🧠 Approach
 
-For each challenge, the writeup contains:
+Every writeup follows the same structure:
 
 1. Challenge description
 2. Initial analysis / reconnaissance
@@ -48,7 +48,7 @@ For each challenge, the writeup contains:
 7. Flag
 8. Key takeaways
 
-The goal is not only to document the flag, but to explain **how** and **why** the solution works.
+I wanted to record not just the flag, but **how** I got to it and **why** the solution works.
 
 ## 🛠️ Tools
 
@@ -63,7 +63,7 @@ THJCC{...}
 ## 📚 Disclaimer
 
 These writeups are published for **educational purposes** and document solutions to CTF challenges.
-All testing was performed against CTF infrastructure or provided challenge files.
+All my testing was done against the CTF infrastructure or the provided challenge files.
 
 ---
 
@@ -73,8 +73,8 @@ All testing was performed against CTF infrastructure or provided challenge files
 <p align="center"><a href="#en">🇬🇧 English</a> · <b>🇷🇺 Русский</b></p>
 
 <p align="center">
-  Разборы и решения заданий <b>THJCC CTF 2026</b>.<br>
-  Решённые таски с подробными объяснениями, методологией, командами и скриптами.
+  Мои разборы заданий <b>THJCC CTF 2026</b>, которые я решил.<br>
+  В каждом рассказываю, что я нашёл, что сделал и почему это сработало, — с командами и скриптами.
 </p>
 
 ---
@@ -106,7 +106,7 @@ All testing was performed against CTF infrastructure or provided challenge files
 
 ## 🧠 Подход
 
-В каждом разборе есть:
+Все разборы построены одинаково:
 
 1. Условие задания
 2. Первичный анализ / разведка
@@ -117,7 +117,7 @@ All testing was performed against CTF infrastructure or provided challenge files
 7. Флаг
 8. Ключевые выводы
 
-Цель — не просто зафиксировать флаг, а объяснить, **как** и **почему** работает решение.
+Я хотел зафиксировать не только флаг, но и то, **как** я к нему пришёл и **почему** решение работает.
 
 ## 🛠️ Инструменты
 
@@ -132,7 +132,7 @@ THJCC{...}
 ## 📚 Дисклеймер
 
 Разборы опубликованы в **образовательных целях** и документируют решения CTF-заданий.
-Всё тестирование выполнялось на инфраструктуре CTF или на выданных файлах заданий.
+Всё тестирование я проводил на инфраструктуре CTF или на выданных файлах заданий.
 
 <p align="center">
   <sub>CTF Writeups • Cybersecurity • Learning by Breaking Things</sub>

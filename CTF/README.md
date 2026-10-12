@@ -11,6 +11,7 @@ Writeups grouped by competition.
 | **TFC-CTF-2026** | 🔐Cryptography | [→ TFC_CTF_2026/](TFC_CTF_2026/) |
 | **COMPFEST-2026** | 🧬 Forensic | [→ COMPFEST-CTF/](COMPFEST-CTF/) |
 | **THJCC-2026** | 🌐 Web · 🧬 Forensics · 🔧 Reverse | [→ THJCC-2026/](THJCC-2026/) |
+| **FortID-CTF-2026** | 🔐 Crypto · 🌐 Web · 🔧 Reverse · 🔎 OSINT | [→ FortID-CTF-2026/](FortID-CTF-2026/) |
 
 ---
 
@@ -27,3 +28,4 @@ Writeups grouped by competition.
 | **TFC-CTF-2026** | 🔐Криптография | [→ TFC_CTF_2026/](TFC_CTF_2026/) |
 | **COMPFEST-2026** | 🧬 Форензика| [→ COMPFEST-CTF/](COMPFEST-CTF/) |
 | **THJCC-2026** | 🌐 Веб · 🧬 Форензика · 🔧 Reverse | [→ THJCC-2026/](THJCC-2026/) |
+| **FortID-CTF-2026** | 🔐 Криптография · 🌐 Веб · 🔧 Reverse · 🔎 OSINT | [→ FortID-CTF-2026/](FortID-CTF-2026/) |

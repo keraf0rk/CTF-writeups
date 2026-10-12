@@ -26,11 +26,12 @@ ls -l TeaGod.exe          # 370688 bytes
 strings -el -n 3 TeaGod.exe
 ```
 
-- MinGW-built GUI program (`BeginPaint`, `CreateWindowExW`, `DefWindowProcW` in
-  the imports — no .NET, no packer). The UTF-16 strings spell out the flow:
-  `WORSHIP TEA GOD`, `Worship count:`, `REWARD UNLOCKED`, `Your reward:`.
-- The 370 KB size is misleading. Parsing the section table shows `.text` is only
-  `0x3A36` bytes; `.rsrc` holds `0x53398` bytes of artwork:
+- It's a MinGW-built GUI program (`BeginPaint`, `CreateWindowExW`,
+  `DefWindowProcW` in the imports — no .NET, no packer). The UTF-16 strings
+  spelled out the flow for me: `WORSHIP TEA GOD`, `Worship count:`,
+  `REWARD UNLOCKED`, `Your reward:`.
+- The 370 KB size was misleading. When I parsed the section table I saw `.text`
+  is only `0x3A36` bytes; `.rsrc` holds `0x53398` bytes of artwork:
 
 ```
 .text     va=0x140001000 vsize=0x3a36 raw=0x400
@@ -41,7 +42,7 @@ strings -el -n 3 TeaGod.exe
 
 ## 3. Investigation path
 
-**Confirmed**
+**What I confirmed**
 
 - The window procedure handles `WM_COMMAND` (`0x111`) with control id `0x1001`
   at `0x140001DCC`: it increments a counter in `.data` at `0x1400080C8`, then
@@ -62,10 +63,10 @@ tmp[i] = ((cipher[i] + (0xE7 - 7 * i)) & 0xFF) ^ key[chunk]
 flag[i] = tmp[i] ^ b"hc_ehsna"[(1 + 3 * i) & 7]
 ```
 
-**Key insight**
+**The insight that solved it**
 
-- In the same layer-2 loop every byte is XOR-ed **twice** with the value returned
-  by the anti-analysis routine at `0x140002E10`:
+- I noticed that in the same layer-2 loop every byte is XOR-ed **twice** with the
+  value returned by the anti-analysis routine at `0x140002E10`:
 
 ```asm
 xor byte ptr [r8 + rdx], r9b      ; ^ runtime byte   (0x140002033 path)
@@ -74,18 +75,11 @@ xor byte ptr [r8 + rdx], r9b      ; ^ the same byte again (0x140001FD0)
 ```
 
   Two XORs with the same value cancel, so whatever that routine computes is
-  irrelevant to a static solve. Spotting the cancellation is what turns this into
-  a five-minute job instead of an emulation exercise.
-
-**Checked and dismissed**
-
-- The pastebin URL inside the flag (`pastebin.com/R58uv133`) — fetching the raw
-  paste returns an empty body, so it is part of the flag string, not a stage two.
-
-**Left to check**
-
-- What the routine at `0x140002E10` actually computes. It is provably irrelevant
-  to the output, so it was never analysed.
+  irrelevant to a static solve. Spotting the cancellation is what turned this
+  into a five-minute job for me instead of an emulation exercise — I never had
+  to work out what `0x140002E10` actually computes. I also fetched the pastebin
+  URL inside the flag (`pastebin.com/R58uv133`) once: the raw paste returned an
+  empty body, so I treated it as part of the flag string, not a stage two.
 
 ## 4. Tools & commands
 
@@ -115,13 +109,18 @@ See [`solve.py`](solve.py).
 
 ## 5. Step-by-step
 
-1. `file` → PE32+ GUI; `strings -el` → `WORSHIP TEA GOD`, `REWARD UNLOCKED`.
-2. Parse the section table → `.text` is only `0x3A36` bytes, `.rsrc` is artwork.
-3. Disassemble `.text`, resolve RIP-relative references into `.rdata`.
-4. Find the `WM_COMMAND` handler → the gate is `counter != 0`, one click.
-5. Layer 1: pointer table `0x140005210`, 3 × 12 bytes, keys at `0x140005228`.
-6. Layer 2: 8-byte key `b"hc_ehsna"` with stride 3; note the self-cancelling XOR.
-7. Chain both layers → the flag.
+1. `file` gave me PE32+ GUI; `strings -el` → `WORSHIP TEA GOD`,
+   `REWARD UNLOCKED`.
+2. I parsed the section table → `.text` is only `0x3A36` bytes, `.rsrc` is
+   artwork.
+3. I disassembled `.text` and resolved the RIP-relative references into
+   `.rdata`.
+4. I found the `WM_COMMAND` handler → the gate is `counter != 0`, one click.
+5. Layer 1: I read the pointer table `0x140005210`, 3 × 12 bytes, keys at
+   `0x140005228`.
+6. Layer 2: 8-byte key `b"hc_ehsna"` with stride 3; I noted the self-cancelling
+   XOR.
+7. I chained both layers → the flag.
 
 ## 6. Solution
 
@@ -152,11 +151,11 @@ THJCC{h77p5://p4s73b1n.com/R58uv133}
 - **Why it worked:** the same byte XOR-ed in twice is an algebraic no-op dressed
   up as anti-analysis. Before emulating any runtime-derived value, count how many
   times it is applied — an even count means it can be deleted from the model.
-- **False leads:** the "666 worships" narrative (the code compares against zero),
-  and the 370 KB file size (90% of it is a `.rsrc` image).
-- **Recognize it next time:** a leetspeak URL inside a flag is usually
-  decoration. Fetch it once to be sure, then stop — an empty or 404 response
-  means the flag is already complete.
+- **What I'll remember:** a leetspeak URL inside a flag is usually decoration —
+  I fetch it once to be sure, then stop, because an empty or 404 response means
+  the flag is already complete. (The "666 worships" narrative and the 370 KB
+  file size were both just flavour — the code compares against zero and 90% of
+  the file is a `.rsrc` image.)
 
 ---
 
@@ -188,11 +187,11 @@ ls -l TeaGod.exe          # 370688 байт
 strings -el -n 3 TeaGod.exe
 ```
 
-- GUI-программа, собранная MinGW (в импортах `BeginPaint`, `CreateWindowExW`,
-  `DefWindowProcW` — ни .NET, ни упаковщика). UTF-16-строки описывают сценарий:
+- Это GUI-программа, собранная MinGW (в импортах `BeginPaint`, `CreateWindowExW`,
+  `DefWindowProcW` — ни .NET, ни упаковщика). UTF-16-строки описали мне сценарий:
   `WORSHIP TEA GOD`, `Worship count:`, `REWARD UNLOCKED`, `Your reward:`.
-- Размер в 370 КБ обманчив. Разбор таблицы секций показывает, что `.text` — всего
-  `0x3A36` байт, а `.rsrc` занимает `0x53398` байт картинки:
+- Размер в 370 КБ оказался обманчив. Когда я разобрал таблицу секций, увидел, что
+  `.text` — всего `0x3A36` байт, а `.rsrc` занимает `0x53398` байт картинки:
 
 ```
 .text     va=0x140001000 vsize=0x3a36 raw=0x400
@@ -203,7 +202,7 @@ strings -el -n 3 TeaGod.exe
 
 ## 3. Путь исследования
 
-**Подтверждено**
+**Что я подтвердил**
 
 - Оконная процедура обрабатывает `WM_COMMAND` (`0x111`) с id контрола `0x1001` по
   адресу `0x140001DCC`: инкрементирует счётчик в `.data` по `0x1400080C8`, затем
@@ -224,10 +223,11 @@ tmp[i] = ((cipher[i] + (0xE7 - 7 * i)) & 0xFF) ^ key[chunk]
 flag[i] = tmp[i] ^ b"hc_ehsna"[(1 + 3 * i) & 7]
 ```
 
-**Ключевая идея**
+**Идея, которая решила задачу**
 
-- В том же цикле второго слоя каждый байт **дважды** XOR-ится со значением,
-  которое возвращает антианализная подпрограмма по адресу `0x140002E10`:
+- Я заметил, что в том же цикле второго слоя каждый байт **дважды** XOR-ится со
+  значением, которое возвращает антианализная подпрограмма по адресу
+  `0x140002E10`:
 
 ```asm
 xor byte ptr [r8 + rdx], r9b      ; ^ рантайм-байт   (путь 0x140002033)
@@ -237,17 +237,10 @@ xor byte ptr [r8 + rdx], r9b      ; ^ тот же байт ещё раз (0x1400
 
   Два XOR-а с одним значением взаимно уничтожаются, поэтому что бы эта
   подпрограмма ни вычисляла, к статическому решению это отношения не имеет.
-  Замеченное сокращение превращает задание в пятиминутное вместо эмуляции.
-
-**Проверено и отброшено**
-
-- Pastebin-ссылка внутри флага (`pastebin.com/R58uv133`) — запрос raw-пасты
-  возвращает пустое тело, то есть это часть строки флага, а не второй этап.
-
-**Осталось проверить**
-
-- Что именно вычисляет подпрограмма `0x140002E10`. На вывод она доказуемо не
-  влияет, поэтому не анализировалась.
+  Замеченное сокращение превратило задание в пятиминутное вместо эмуляции — мне
+  так и не пришлось разбираться, что именно считает `0x140002E10`. Pastebin-ссылку
+  внутри флага (`pastebin.com/R58uv133`) я один раз запросил: raw-паста вернула
+  пустое тело, поэтому я счёл её частью строки флага, а не вторым этапом.
 
 ## 4. Инструменты и команды
 
@@ -277,13 +270,14 @@ python3 solve.py
 
 ## 5. Пошаговое решение
 
-1. `file` → PE32+ GUI; `strings -el` → `WORSHIP TEA GOD`, `REWARD UNLOCKED`.
-2. Разбираем таблицу секций → `.text` всего `0x3A36` байт, `.rsrc` — картинка.
-3. Дизассемблируем `.text`, разрешаем RIP-относительные ссылки в `.rdata`.
-4. Находим обработчик `WM_COMMAND` → условие `counter != 0`, достаточно клика.
-5. Слой 1: таблица указателей `0x140005210`, 3 × 12 байт, ключи по `0x140005228`.
-6. Слой 2: 8-байтный ключ `b"hc_ehsna"` с шагом 3; замечаем самосокращающийся XOR.
-7. Склеиваем оба слоя → флаг.
+1. `file` дал PE32+ GUI; `strings -el` → `WORSHIP TEA GOD`, `REWARD UNLOCKED`.
+2. Разобрал таблицу секций → `.text` всего `0x3A36` байт, `.rsrc` — картинка.
+3. Дизассемблировал `.text`, разрешил RIP-относительные ссылки в `.rdata`.
+4. Нашёл обработчик `WM_COMMAND` → условие `counter != 0`, достаточно клика.
+5. Слой 1: прочитал таблицу указателей `0x140005210`, 3 × 12 байт, ключи по
+   `0x140005228`.
+6. Слой 2: 8-байтный ключ `b"hc_ehsna"` с шагом 3; заметил самосокращающийся XOR.
+7. Склеил оба слоя → флаг.
 
 ## 6. Итоговое решение
 
@@ -315,8 +309,8 @@ THJCC{h77p5://p4s73b1n.com/R58uv133}
   алгебраический no-op под видом антианализа. Прежде чем эмулировать
   рантайм-значение, посчитайте, сколько раз оно применяется: чётное число
   означает, что его можно выкинуть из модели.
-- **Ложные следы:** легенда про «666 поклонений» (код сравнивает с нулём) и
-  размер файла в 370 КБ (90% — картинка в `.rsrc`).
-- **Как узнать в следующий раз:** leet-URL внутри флага обычно декорация.
-  Запросите его один раз для уверенности и остановитесь: пустой ответ или 404
-  означают, что флаг уже полный.
+- **Что запомню:** leet-URL внутри флага обычно декорация — я запрашиваю его
+  один раз для уверенности и останавливаюсь, потому что пустой ответ или 404
+  означают, что флаг уже полный. (Легенда про «666 поклонений» и размер файла в
+  370 КБ оказались просто антуражем: код сравнивает с нулём, а 90% файла —
+  картинка в `.rsrc`.)

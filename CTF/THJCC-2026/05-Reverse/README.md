@@ -36,12 +36,12 @@ strings -n 5 license_v2
 
 ## 3. Investigation path
 
-**Confirmed**
+**What I confirmed**
 
 - The argument loop at `0x201264` keeps two counters in lockstep (`rcx = rdi + 1`)
   and tests `5 * floor(rcx / 5) - 1 == rdi`, which selects indexes 4, 9, 14, 19,
-  24 for `'-'`. Everything else must be a hex digit. With `strlen == 29` the
-  format is exactly `XXXX-XXXX-XXXX-XXXX-XXXX-XXXX` → 24 nibbles.
+  24 for `'-'`. Everything else must be a hex digit. With `strlen == 29` I read
+  the format as exactly `XXXX-XXXX-XXXX-XXXX-XXXX-XXXX` → 24 nibbles.
 - The real validation is three stages: a `.rodata`-driven byte permutation with
   per-byte `xor`/`rol`/`add` (SSE block at `0x201410`), four diffusion rounds of
   the shape `new[i] = rol(((i + c) ^ K) ^ S[i] ^ S[(i + 7) % 24], shift)` with
@@ -49,27 +49,17 @@ strings -n 5 license_v2
   comparison against 24 constants starting at `0x201A34`.
 - The success branch at `0x201BC3` derives **nothing** from the key: it decodes a
   fixed `.rodata` blob at VA `0x200210` and writes it out.
-- That decoder is a rolling XOR: key starts at `0x7E`, grows by `0x1A` per byte
-  pair, the even byte of a pair is XOR-ed with `key - 0x0D`, the odd one with
-  `key`; the loop stops at index `0x1F` → 31 bytes.
+- That decoder is a rolling XOR: the key starts at `0x7E`, grows by `0x1A` per
+  byte pair, the even byte of a pair is XOR-ed with `key - 0x0D`, the odd one
+  with `key`; the loop stops at index `0x1F` → 31 bytes.
 
-**Key insight**
+**The insight that solved it**
 
-- Reading the *win branch* before the validator collapses the whole challenge.
-  The flag is a constant, so the three-stage pipeline never has to be inverted.
-
-**False lead**
-
-- At `0x201398` a hash is seeded with `0x31415926` and folded over the input with
-  `xor`/`ror 29`. It looks like the check — but `0x2013F7` loads the result into
-  `eax` and `0x201404` immediately does `xor eax, eax`. Dead code.
-
-**Left to check**
-
-- A *valid license key* was never produced. Inverting the four rounds is feasible
-  (`gcd(7, 24) = 1` makes `S[i] ^ S[(i + 7) % 24]` a single 24-cycle, so each
-  round inverts up to one global XOR byte, and the hex-only alphabet should pin
-  the survivor), but it is not needed for the flag and was not carried out.
+- I read the *win branch* before the validator, and that collapsed the whole
+  challenge. The flag is a constant, so I never had to invert the three-stage
+  pipeline. (I did check the `0x31415926` hash at `0x201398` first: `0x2013F7`
+  loads its result into `eax` and `0x201404` immediately does `xor eax, eax`, so
+  it is dead code and I ignored it.)
 
 ## 4. Tools & commands
 
@@ -94,14 +84,15 @@ Pure-Python solver, no RE tooling needed at solve time. See [`solve.py`](solve.p
 
 ## 5. Step-by-step
 
-1. `file` / `readelf` → 3.6 KB static stripped ELF, `.rodata` + `.text` only.
-2. Disassemble all of `.text`.
-3. Read the argument loop → 29 chars, dashes at 4/9/14/19/24, hex elsewhere.
-4. Spot the `0x31415926` hash and confirm its result is discarded.
-5. Map the real pipeline: permutation → 4 diffusion rounds → 24 constants.
-6. Notice the success branch decodes a fixed blob instead of using the key.
-7. Parse the ELF section table, translate VA `0x200210` → file offset.
-8. Undo the rolling XOR over 31 bytes → the flag.
+1. `file` / `readelf` told me it was a 3.6 KB static stripped ELF with only
+   `.rodata` + `.text`.
+2. I disassembled all of `.text`.
+3. I read the argument loop → 29 chars, dashes at 4/9/14/19/24, hex elsewhere.
+4. I spotted the `0x31415926` hash and confirmed its result is discarded.
+5. I mapped the real pipeline: permutation → 4 diffusion rounds → 24 constants.
+6. I noticed the success branch decodes a fixed blob instead of using the key.
+7. I parsed the ELF section table and translated VA `0x200210` → file offset.
+8. I undid the rolling XOR over 31 bytes → the flag.
 
 ## 6. Solution
 
@@ -130,9 +121,7 @@ THJCC{license_pipeline_rebuilt}
   actually requires.
 - **Why it worked:** the flag decoder is a rolling XOR over a fixed blob, fully
   reproducible from the file. No key, no execution, no emulation.
-- **False leads:** the `0x31415926` hash (result discarded two instructions
-  later) and the intimidating SSE diffusion rounds, which never touch the flag.
-- **Recognize it next time:** static, stripped, syscall-only ELF of a few KB with
+- **What I'll remember:** static, stripped, syscall-only ELF of a few KB with
   a `.rodata` blob roughly the length of a flag → look for a rolling-XOR decoder
   near the success branch before reversing any validation. The same author reuses
   this exact construction in [`06-Reverse`](../06-Reverse/),
@@ -179,12 +168,12 @@ strings -n 5 license_v2
 
 ## 3. Путь исследования
 
-**Подтверждено**
+**Что я подтвердил**
 
 - Цикл по аргументу `0x201264` ведёт два синхронных счётчика (`rcx = rdi + 1`) и
   проверяет `5 * floor(rcx / 5) - 1 == rdi`, что отбирает индексы 4, 9, 14, 19,
-  24 под `'-'`. Всё остальное обязано быть hex-цифрой. Вместе с `strlen == 29`
-  формат ровно `XXXX-XXXX-XXXX-XXXX-XXXX-XXXX` → 24 ниббла.
+  24 под `'-'`. Всё остальное обязано быть hex-цифрой. Вместе с `strlen == 29` я
+  прочитал формат как ровно `XXXX-XXXX-XXXX-XXXX-XXXX-XXXX` → 24 ниббла.
 - Настоящая валидация трёхстадийная: перестановка байт по таблице из `.rodata` с
   побайтовыми `xor`/`rol`/`add` (SSE-блок `0x201410`), четыре раунда диффузии вида
   `new[i] = rol(((i + c) ^ K) ^ S[i] ^ S[(i + 7) % 24], shift)` с
@@ -196,25 +185,13 @@ strings -n 5 license_v2
   байт, чётный байт пары XOR-ится с `key - 0x0D`, нечётный — с `key`; цикл
   останавливается на индексе `0x1F` → 31 байт.
 
-**Ключевая идея**
+**Идея, которая решила задачу**
 
-- Чтение *ветки победы* раньше валидатора схлопывает всё задание: флаг — это
-  константа, и трёхстадийный конвейер обращать не нужно вовсе.
-
-**Ложный след**
-
-- По адресу `0x201398` хеш инициализируется значением `0x31415926` и
-  сворачивается по вводу через `xor`/`ror 29`. Выглядит как проверка — но
-  `0x2013F7` кладёт результат в `eax`, а `0x201404` тут же делает `xor eax, eax`.
-  Мёртвый код.
-
-**Осталось проверить**
-
-- Валидный лицензионный ключ так и не был получен. Обратить четыре раунда
-  реально (`gcd(7, 24) = 1` делает `S[i] ^ S[(i + 7) % 24]` одним циклом длины
-  24, поэтому каждый раунд обращается с точностью до одного глобального
-  XOR-байта, а hex-алфавит должен отсеять лишних), но для флага это не нужно и
-  сделано не было.
+- Я прочитал *ветку победы* раньше валидатора, и это схлопнуло всё задание: флаг
+  — константа, и трёхстадийный конвейер мне обращать не пришлось вовсе. (Хеш
+  `0x31415926` по адресу `0x201398` я сначала проверил: `0x2013F7` кладёт его
+  результат в `eax`, а `0x201404` тут же делает `xor eax, eax` — это мёртвый код,
+  и я его проигнорировал.)
 
 ## 4. Инструменты и команды
 
@@ -240,14 +217,16 @@ python3 solve.py --check-key 'AAAA-BBBB-CCCC-DDDD-EEEE-FFFF'   # только ф
 
 ## 5. Пошаговое решение
 
-1. `file` / `readelf` → 3.6 КБ, статический stripped ELF, только `.rodata` и `.text`.
-2. Дизассемблируем весь `.text`.
-3. Читаем цикл по аргументу → 29 символов, дефисы на 4/9/14/19/24, остальное hex.
-4. Замечаем хеш `0x31415926` и убеждаемся, что результат выбрасывается.
-5. Размечаем настоящий конвейер: перестановка → 4 раунда диффузии → 24 константы.
-6. Замечаем, что ветка успеха декодирует фиксированный блоб, а не использует ключ.
-7. Разбираем таблицу секций ELF, переводим VA `0x200210` в смещение в файле.
-8. Снимаем бегущий XOR с 31 байта → флаг.
+1. `file` / `readelf` показали 3.6 КБ, статический stripped ELF, только
+   `.rodata` и `.text`.
+2. Дизассемблировал весь `.text`.
+3. Прочитал цикл по аргументу → 29 символов, дефисы на 4/9/14/19/24, остальное
+   hex.
+4. Заметил хеш `0x31415926` и убедился, что результат выбрасывается.
+5. Разметил настоящий конвейер: перестановка → 4 раунда диффузии → 24 константы.
+6. Заметил, что ветка успеха декодирует фиксированный блоб, а не использует ключ.
+7. Разобрал таблицу секций ELF, перевёл VA `0x200210` в смещение в файле.
+8. Снял бегущий XOR с 31 байта → флаг.
 
 ## 6. Итоговое решение
 
@@ -275,9 +254,7 @@ THJCC{license_pipeline_rebuilt}
   ветку победы первой: именно она определяет, сколько работы реально нужно.
 - **Почему сработало:** декодер флага — бегущий XOR по фиксированному блобу,
   полностью воспроизводимый из файла. Ни ключа, ни запуска, ни эмуляции.
-- **Ложные следы:** хеш `0x31415926` (результат выбрасывается через две
-  инструкции) и пугающие SSE-раунды диффузии, которые к флагу не прикасаются.
-- **Как узнать в следующий раз:** статический stripped ELF на несколько КБ,
+- **Что запомню:** статический stripped ELF на несколько КБ,
   только syscall-ы и блоб в `.rodata` длиной примерно с флаг → сначала ищите
   rolling-XOR-декодер рядом с веткой успеха и только потом реверсьте валидацию.
   Тот же автор переиспользует ровно эту конструкцию в

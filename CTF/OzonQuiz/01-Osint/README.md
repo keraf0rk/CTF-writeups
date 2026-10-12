@@ -24,8 +24,8 @@
 
 ## 3. Investigation path
 
-Gosha "chats" on the Ozon Tech Telegram (`@ozon_tech`). Ozon's flagship event on those exact dates
-is the annual conference **E-CODE**.
+I knew Gosha "chats" on the Ozon Tech Telegram (`@ozon_tech`), so I looked at Ozon's own events: the
+flagship one on those exact dates is the annual conference **E-CODE**.
 
 ## 4. Findings
 
@@ -36,21 +36,21 @@ is the annual conference **E-CODE**.
 
 ## 5. Solution
 
-The event in Gosha's calendar is Ozon Tech's IT conference **E-CODE**. The accepted flag is the
-plain conference name (no year, no separators):
+The event in Gosha's calendar is Ozon Tech's IT conference **E-CODE**. The flag that was accepted is
+the plain conference name (no year, no separators):
 
 ```
 ozonctf{E-CODE}
 ```
 
-> Note: dated/verbose variants (`E-CODE_2026`, `E-CODE 2026`, `E-CODE'26`) were "close but not
-> exact" — the scorebot wants just the bare event name.
+> Note: the dated/verbose variants I tried (`E-CODE_2026`, `E-CODE 2026`, `E-CODE'26`) came back
+> "close but not exact" — the scorebot wanted just the bare event name.
 
 ## 6. Key takeaways
 
-- Recognise the persona first: *Gosha = Ozon Tech mascot (Go + C#)*.
-- Map flavour words to platforms, then pivot to the org's real events (E-CODE).
-- For "name the event" flags, try the **shortest canonical form** first — the bare name beat every
+- I recognised the persona first: *Gosha = Ozon Tech mascot (Go + C#)*.
+- I mapped the flavour words to platforms, then pivoted to the org's real events (E-CODE).
+- For "name the event" flags I try the **shortest canonical form** first — the bare name beat every
   dated/formatted variant here.
 
 ---
@@ -81,8 +81,8 @@ ozonctf{E-CODE}
 
 ## 3. Путь исследования
 
-Гоша «общается» в Telegram Ozon Tech (`@ozon_tech`). Флагманское событие Ozon ровно на эти даты —
-ежегодная конференция **E-CODE**.
+Я знал, что Гоша «общается» в Telegram Ozon Tech (`@ozon_tech`), поэтому посмотрел события самого
+Ozon: флагманское ровно на эти даты — ежегодная конференция **E-CODE**.
 
 ## 4. Находки
 
@@ -93,19 +93,19 @@ ozonctf{E-CODE}
 
 ## 5. Итоговое решение
 
-Событие в календаре Гоши — IT-конференция Ozon Tech **E-CODE**. Принятый флаг — чистое название
-конференции (без года и разделителей):
+Событие в календаре Гоши — IT-конференция Ozon Tech **E-CODE**. Флаг, который приняли, — чистое
+название конференции (без года и разделителей):
 
 ```
 ozonctf{E-CODE}
 ```
 
-> Замечание: датированные/развёрнутые варианты (`E-CODE_2026`, `E-CODE 2026`, `E-CODE'26`) были
-> «близко, но не то» — боту нужно именно голое название события.
+> Замечание: датированные/развёрнутые варианты, которые я пробовал (`E-CODE_2026`, `E-CODE 2026`,
+> `E-CODE'26`), возвращались как «близко, но не то» — боту нужно именно голое название события.
 
 ## 6. Ключевые выводы
 
-- Сначала опознать персону: *Гоша = маскот Ozon Tech (Go + C#)*.
-- Сопоставить слова-подсказки с площадками, выйти на реальные события (E-CODE).
-- Для флагов вида «назови событие» пробуй **самую короткую каноничную форму** — здесь голое
+- Сначала я опознал персону: *Гоша = маскот Ozon Tech (Go + C#)*.
+- Сопоставил слова-подсказки с площадками и вышел на реальные события (E-CODE).
+- Для флагов вида «назови событие» я пробую **самую короткую каноничную форму** — здесь голое
   название побило все датированные/форматированные варианты.

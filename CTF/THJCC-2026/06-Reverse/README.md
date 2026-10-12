@@ -35,7 +35,7 @@ strings -n 5 404  # "vm rejected input"
 
 ## 3. Investigation path
 
-**Confirmed**
+**What I confirmed**
 
 - `0x20130D`–`0x2013ED` is an uninterrupted run of `movaps xmm0, [rip + X]` /
   `movaps [rsp + D], xmm0` pairs closed by `mov byte [rsp + 0xB0], 7`. It
@@ -74,17 +74,14 @@ strings -n 5 404  # "vm rejected input"
   the same construction as [`05-Reverse`](../05-Reverse/) and
   [`07-Reverse`](../07-Reverse/).
 
-**Key insight**
+**The insight that solved it**
 
-- The win condition is an *opcode*. Enumerating the handler table before touching
-  the bytecode turns "reverse the program" into "find which opcode prints the
-  flag" — and that one needs no valid input at all.
-
-**False lead**
-
-- Dumping `.rodata` linearly and parsing it as bytecode produces garbage: the
-  loader writes 16-byte chunks to the stack out of order. The loader has to be
-  *replayed*, not read.
+- The win condition is an *opcode*. Once I enumerated the handler table before
+  touching the bytecode, "reverse the program" became "find which opcode prints
+  the flag" — and that one needs no valid input at all. (One thing I had to get
+  right: dumping `.rodata` linearly as bytecode gives garbage, because the loader
+  writes 16-byte chunks to the stack out of order, so I replayed the loader
+  rather than reading the data straight.)
 
 ## 4. Tools & commands
 
@@ -108,13 +105,15 @@ See [`solve.py`](solve.py).
 
 ## 5. Step-by-step
 
-1. `file` / `readelf` → 2 KB static stripped ELF, `.rodata` nearly half the image.
-2. Disassemble `.text`; find the `movaps` loader and the `jmp [table]` dispatch.
-3. Replay the loader to rebuild `0x121` bytes of bytecode (order matters).
-4. Recover the 8-opcode table from the jump table at `0x200240`.
-5. Parse the bytecode → 16 × `LOAD/XOR/ADD/ROL/CMP/CHECK` + opcode `07`.
-6. Invert each block → `vm_is_not_magic!`; replay forward to confirm.
-7. Decode the `.rodata` blob at VA `0x200280` → the flag.
+1. `file` / `readelf` showed a 2 KB static stripped ELF, `.rodata` nearly half
+   the image.
+2. I disassembled `.text` and found the `movaps` loader and the `jmp [table]`
+   dispatch.
+3. I replayed the loader to rebuild `0x121` bytes of bytecode (order matters).
+4. I recovered the 8-opcode table from the jump table at `0x200240`.
+5. I parsed the bytecode → 16 × `LOAD/XOR/ADD/ROL/CMP/CHECK` + opcode `07`.
+6. I inverted each block → `vm_is_not_magic!` and replayed it forward to confirm.
+7. I decoded the `.rodata` blob at VA `0x200280` → the flag.
 
 ## 6. Solution
 
@@ -145,9 +144,7 @@ THJCC{vm_bytecode_is_a_contract}
 - **Why it worked:** per-byte independence again (as in
   [`03-Reverse`](../03-Reverse/)), so inversion is arithmetic rather than search;
   and the flag turned out to be a constant reachable without any valid input.
-- **False leads:** reading `.rodata` linearly as bytecode (the loader scrambles
-  chunk order), and assuming the 16-byte input had to be brute-forced.
-- **Recognize it next time:** read the opcode table before the bytecode. If a
+- **What I'll remember:** read the opcode table before the bytecode. If a
   handler writes to stdout, that is the whole challenge.
 
 ---
@@ -189,7 +186,7 @@ strings -n 5 404  # "vm rejected input"
 
 ## 3. Путь исследования
 
-**Подтверждено**
+**Что я подтвердил**
 
 - Диапазон `0x20130D`–`0x2013ED` — непрерывная серия пар
   `movaps xmm0, [rip + X]` / `movaps [rsp + D], xmm0`, закрытая
@@ -228,17 +225,14 @@ strings -n 5 404  # "vm rejected input"
   конструкция, что в [`05-Reverse`](../05-Reverse/) и
   [`07-Reverse`](../07-Reverse/).
 
-**Ключевая идея**
+**Идея, которая решила задачу**
 
-- Условие победы является *опкодом*. Перечисление таблицы обработчиков до разбора
-  байткода превращает «отреверсить программу» в «найти опкод, который печатает
-  флаг», а ему валидный ввод вообще не нужен.
-
-**Ложный след**
-
-- Линейный дамп `.rodata` и попытка разобрать его как байткод дают мусор:
-  загрузчик пишет 16-байтные куски на стек не по порядку. Загрузчик надо
-  *воспроизводить*, а не читать.
+- Условие победы — это *опкод*. Как только я перечислил таблицу обработчиков до
+  разбора байткода, «отреверсить программу» превратилось в «найти опкод, который
+  печатает флаг», а ему валидный ввод вообще не нужен. (Одно пришлось учесть:
+  линейный дамп `.rodata` как байткода даёт мусор, потому что загрузчик пишет
+  16-байтные куски на стек не по порядку, — поэтому я воспроизвёл загрузчик, а не
+  читал данные напрямую.)
 
 ## 4. Инструменты и команды
 
@@ -262,13 +256,14 @@ python3 solve.py --recover-input # ещё и восстановить argv[1]
 
 ## 5. Пошаговое решение
 
-1. `file` / `readelf` → 2 КБ, статический stripped ELF, `.rodata` почти половина образа.
-2. Дизассемблируем `.text`; находим `movaps`-загрузчик и диспетчер `jmp [table]`.
-3. Воспроизводим загрузчик и собираем `0x121` байт байткода (порядок важен).
-4. Восстанавливаем таблицу из 8 опкодов по таблице переходов `0x200240`.
-5. Разбираем байткод → 16 × `LOAD/XOR/ADD/ROL/CMP/CHECK` + опкод `07`.
-6. Обращаем каждый блок → `vm_is_not_magic!`; прогоняем вперёд для проверки.
-7. Декодируем блоб `.rodata` по VA `0x200280` → флаг.
+1. `file` / `readelf` показали 2 КБ, статический stripped ELF, `.rodata` почти
+   половина образа.
+2. Дизассемблировал `.text` и нашёл `movaps`-загрузчик и диспетчер `jmp [table]`.
+3. Воспроизвёл загрузчик и собрал `0x121` байт байткода (порядок важен).
+4. Восстановил таблицу из 8 опкодов по таблице переходов `0x200240`.
+5. Разобрал байткод → 16 × `LOAD/XOR/ADD/ROL/CMP/CHECK` + опкод `07`.
+6. Обратил каждый блок → `vm_is_not_magic!` и прогнал вперёд для проверки.
+7. Декодировал блоб `.rodata` по VA `0x200280` → флаг.
 
 ## 6. Итоговое решение
 
@@ -299,8 +294,5 @@ THJCC{vm_bytecode_is_a_contract}
 - **Почему сработало:** снова независимость по байтам (как в
   [`03-Reverse`](../03-Reverse/)), поэтому обращение — арифметика, а не перебор;
   а флаг оказался константой, доступной вообще без валидного ввода.
-- **Ложные следы:** линейное чтение `.rodata` как байткода (загрузчик
-  перемешивает порядок кусков) и предположение, что 16-байтный ввод нужно
-  перебирать.
-- **Как узнать в следующий раз:** читайте таблицу опкодов раньше байткода. Если
-  какой-то обработчик пишет в stdout — это и есть всё задание.
+- **Что запомню:** читать таблицу опкодов раньше байткода. Если какой-то
+  обработчик пишет в stdout — это и есть всё задание.

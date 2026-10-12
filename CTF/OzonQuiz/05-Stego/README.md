@@ -24,20 +24,20 @@ Container: a stock "office sounds" clip (`Sound-Pack.net`) as cover; you can hea
 
 ## 2. Initial analysis
 
-Dead ends ruled out: **not** LSB, **not** steghide (themed-password brute), **not** a high-band
-signal, **not** appended data, **not** a null-cipher on the spoken dialogue.
+I ruled out the dead ends first: it is **not** LSB, **not** steghide, **not** a high-band signal,
+**not** appended data, and **not** a null-cipher on the spoken dialogue.
 
-The tell is **"the sound of dialing digits" = DTMF**, buried under the office noise.
+The tell for me was **"the sound of dialing digits" = DTMF**, buried under the office noise.
 
 ## 3. Investigation path
 
-A single digit is pressed **several times in a row** → **multi-tap** (old-phone text entry):
-`2=ABC`, `6=MNO`, `7=PQRS`, `9=WXYZ`… where *N* presses of a key = the *N*-th letter.
+I noticed a single digit is pressed **several times in a row** → **multi-tap** (old-phone text
+entry): `2=ABC`, `6=MNO`, `7=PQRS`, `9=WXYZ`… where *N* presses of a key = the *N*-th letter.
 So `6×3 = O`, `9×4 = Z`, `7×4 = S`, `4×2 = H`, …
 
 ## 4. Tools & commands
 
-`Python` (NumPy, SciPy). Goertzel over the 8 DTMF frequencies with a **tone-purity** filter to
+`Python` (NumPy, SciPy). I ran Goertzel over the 8 DTMF frequencies with a **tone-purity** filter to
 reject speech/keyboard, plus per-letter tap counting via envelope peaks of the two tones.
 
 ```bash
@@ -46,7 +46,7 @@ python3 ./call.py Task_5.wav
 
 ## 5. Step-by-step
 
-Decoded sequence (key `1` is structural: braces / separator):
+The sequence I decoded (key `1` is structural: braces / separator):
 
 ```
 OZONCTF { S3CR3T _ CH4NN3(1) }
@@ -70,10 +70,12 @@ ozonctf{S3CR3T_CH4NN31}
 
 ## 8. Key takeaways
 
-- "Sounds of dialing" over noise ⇒ **DTMF**. Repeated same-digit presses ⇒ **multi-tap** text.
-- Reject speech with a **two-tone purity** test (real DTMF = exactly two pure tones); count taps
-  by envelope peaks, not by naive thresholding.
-- Story words ("pigeons", "weather", "coffee machines") were pure flavour/misdirection.
+- "Sounds of dialing" over noise means **DTMF** to me; repeated same-digit presses mean
+  **multi-tap** text.
+- I reject speech with a **two-tone purity** test (real DTMF = exactly two pure tones) and count
+  taps by envelope peaks, not by naive thresholding.
+- The story words ("pigeons", "weather", "coffee machines") were pure flavour, and I treated them
+  as misdirection.
 
 ---
 
@@ -102,21 +104,21 @@ ozonctf{S3CR3T_CH4NN31}
 
 ## 2. Первичный анализ
 
-Отсекаем тупики: **не** LSB, **не** steghide (перебор тематических паролей), **не** ВЧ-сигнал,
-**не** приписанные данные, **не** нуль-шифр по тексту разговора.
+Сначала я отсёк тупики: это **не** LSB, **не** steghide, **не** ВЧ-сигнал, **не** приписанные
+данные и **не** нуль-шифр по тексту разговора.
 
-Ключ — **«звуки набора цифр» = DTMF**, спрятанные под офисным шумом.
+Подсказкой для меня стали **«звуки набора цифр» = DTMF**, спрятанные под офисным шумом.
 
 ## 3. Путь исследования
 
-Одна цифра нажимается **по несколько раз подряд** → **multi-tap** (набор букв на кнопочном телефоне):
-`2=ABC`, `6=MNO`, `7=PQRS`, `9=WXYZ`… где *N* нажатий = *N*-я буква.
+Я заметил, что одна цифра нажимается **по несколько раз подряд** → **multi-tap** (набор букв на
+кнопочном телефоне): `2=ABC`, `6=MNO`, `7=PQRS`, `9=WXYZ`… где *N* нажатий = *N*-я буква.
 Значит `6×3 = O`, `9×4 = Z`, `7×4 = S`, `4×2 = H`, …
 
 ## 4. Инструменты и команды
 
-`Python` (NumPy, SciPy). Goertzel по 8 DTMF-частотам + фильтр по **чистоте тона** (отсекает
-речь/клавиатуру) + точный подсчёт тапов по пикам огибающей двух тонов.
+`Python` (NumPy, SciPy). Я прогнал Goertzel по 8 DTMF-частотам + фильтр по **чистоте тона**
+(отсекает речь/клавиатуру) + точный подсчёт тапов по пикам огибающей двух тонов.
 
 ```bash
 python3 ./call.py Task_5.wav
@@ -124,7 +126,7 @@ python3 ./call.py Task_5.wav
 
 ## 5. Пошаговое решение
 
-Раскодированная последовательность (клавиша `1` — структурная: скобки / разделитель):
+Последовательность, которую я раскодировал (клавиша `1` — структурная: скобки / разделитель):
 
 ```
 OZONCTF { S3CR3T _ CH4NN3(1) }
@@ -148,7 +150,8 @@ ozonctf{S3CR3T_CH4NN31}
 
 ## 8. Ключевые выводы
 
-- «Звуки набора» поверх шума ⇒ **DTMF**. Повторные нажатия одной цифры ⇒ **multi-tap** текст.
-- Речь отсекаем тестом на **чистоту двух тонов** (реальный DTMF = ровно два чистых тона); тапы
-  считаем по пикам огибающей, а не наивным порогом.
-- Слова из сюжета («голуби», «погода», «кофемашины») — чистая маскировка.
+- «Звуки набора» поверх шума означают для меня **DTMF**; повторные нажатия одной цифры —
+  **multi-tap** текст.
+- Речь я отсекаю тестом на **чистоту двух тонов** (реальный DTMF = ровно два чистых тона), а тапы
+  считаю по пикам огибающей, а не наивным порогом.
+- Слова из сюжета («голуби», «погода», «кофемашины») — чистая маскировка, и я счёл их отвлечением.

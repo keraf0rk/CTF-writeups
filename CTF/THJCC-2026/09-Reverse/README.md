@@ -25,10 +25,10 @@ xxd traffic.pcap | tail -8
 strings -n 5 BlackFrost.exe
 ```
 
-- The `.exe` extension is a lie: it is a 7 KB static, stripped **ELF**, the same
-  hand-written syscall style as [`05-Reverse`](../05-Reverse/) and
-  [`06-Reverse`](../06-Reverse/) by the same author. The "Windows sandbox" note
-  is misdirection — nothing needs to be run.
+- The `.exe` extension turned out to be a lie: it is a 7 KB static, stripped
+  **ELF**, the same hand-written syscall style as [`05-Reverse`](../05-Reverse/)
+  and [`06-Reverse`](../06-Reverse/) by the same author. I read the "Windows
+  sandbox" note as misdirection — nothing needs to be run.
 - The capture is two loopback packets:
 
 ```
@@ -43,7 +43,7 @@ strings -n 5 BlackFrost.exe
 
 ## 3. Investigation path
 
-**Confirmed**
+**What I confirmed**
 
 - `0x1400012B6` hashes `argv[1]` with FNV-1a 32 and compares against
   `0xB700B632` — exactly the value the client sends in `BFHELLO b700b632`. The
@@ -70,27 +70,17 @@ plain[n] = cipher[n] ^ (hash >> (8 * (n & 3))) ^ ((90 + 17 * n) & 0xFF)
   at VA `0x140003080` with the author's rolling XOR (seed `0x26`, step `0x1A`,
   even byte of each pair against `key - 0x0D`) and writes it with `WriteFile`.
 
-**Key insight**
+**The insight that solved it**
 
-- A constant in the binary that also appears verbatim on the wire means the
-  capture already contains the key material. Diff pcap strings against the
-  immediates in the disassembly before planning any dynamic work.
-
-**False lead**
-
-- `0x140001394`–`0x140001501` is a dense SSE loop that decrypts a 56-byte
-  `.rdata` blob with the same hash, appends three bytes derived from `ebp` and
-  checks `strlen < 0x17`. It is positioned and sized to look like the payload and
-  is reached *before* the real routine — but it belongs to the
-  `stage unpack failed` path and decrypts to noise. (The SSE block at
-  `0x140001A7E` is likewise not crypto: it is a hex encoder building
-  `BFHELLO <hash>\n`.)
-
-**Left to check**
-
-- No `--token` value producing FNV-1a `0xB700B632` was searched for. It is
-  unnecessary, and a 32-bit FNV preimage is trivially collidable, so any
-  discovered token would likely not be the author's.
+- A constant in the binary that also appeared verbatim on the wire told me the
+  capture already contained the key material. I diffed the pcap strings against
+  the immediates in the disassembly before planning any dynamic work, so I never
+  needed a `--token` value producing FNV-1a `0xB700B632`. (One stretch I had to
+  rule out: `0x140001394`–`0x140001501` is a dense SSE loop that decrypts a
+  56-byte `.rdata` blob with the same hash and is placed *before* the real
+  routine, but it belongs to the `stage unpack failed` path and decrypts to
+  noise. The SSE block at `0x140001A7E` is not crypto either — it is a hex
+  encoder building `BFHELLO <hash>\n`.)
 
 ## 4. Tools & commands
 
@@ -115,13 +105,15 @@ scapy/tshark). See [`solve.py`](solve.py).
 
 ## 5. Step-by-step
 
-1. `file` → the `.exe` is actually a static stripped ELF; `xxd` the 304-byte pcap.
-2. Read the two TCP payloads → `BFHELLO b700b632` and `BF2:<hex>`.
-3. Disassemble `.text`; find the FNV-1a comparison against `0xB700B632`.
-4. Match that constant to the handshake → the hash is available without the token.
-5. Catalogue and dismiss the anti-analysis checks and the SSE decoy blob.
-6. Decrypt the C2 payload: `cipher[n] ^ (hash >> 8*(n&3)) ^ (90 + 17n)`.
-7. Decode the flag blob at VA `0x140003080`, 34 bytes, seed `0x26`.
+1. `file` showed me the `.exe` is actually a static stripped ELF; I `xxd`'d the
+   304-byte pcap.
+2. I read the two TCP payloads → `BFHELLO b700b632` and `BF2:<hex>`.
+3. I disassembled `.text` and found the FNV-1a comparison against `0xB700B632`.
+4. I matched that constant to the handshake → the hash is available without the
+   token.
+5. I catalogued and dismissed the anti-analysis checks and the SSE decoy blob.
+6. I decrypted the C2 payload: `cipher[n] ^ (hash >> 8*(n&3)) ^ (90 + 17n)`.
+7. I decoded the flag blob at VA `0x140003080`, 34 bytes, seed `0x26`.
 
 ## 6. Solution
 
@@ -136,7 +128,7 @@ SUCCESS flag = THJCC{blackfrost_config_recovered}
 SUCCESS matches the known-good config and flag
 ```
 
-Nothing was executed: no Windows sandbox, no replay server on port 31337.
+I executed nothing: no Windows sandbox, no replay server on port 31337.
 
 ## 7. Flag
 
@@ -152,13 +144,11 @@ THJCC{blackfrost_config_recovered}
 - **Why it worked:** the stream cipher is a per-byte XOR of three known terms —
   ciphertext, a rotation of the hash, and a position-dependent addend. Entirely
   offline.
-- **False leads:** the "test in the Windows sandbox" instruction on a file that
-  is not a PE, and the SSE-decrypted 56-byte decoy blob belonging to
-  `stage unpack failed`. When decryption yields noise, check whether that branch
-  owns an error string — decoys usually do.
-- **Recognize it next time:** implant + pcap → recover the key schedule from the
+- **What I'll remember:** implant + pcap → recover the key schedule from the
   handshake, then look for a `.rodata` blob of flag length. Running the sample is
-  the last resort, not the first step.
+  the last resort, not the first step. (When a decryption yields noise, I check
+  whether that branch owns an error string — decoys usually do, which is how I
+  knew the 56-byte SSE blob belonged to `stage unpack failed`.)
 
 ---
 
@@ -189,10 +179,10 @@ xxd traffic.pcap | tail -8
 strings -n 5 BlackFrost.exe
 ```
 
-- Расширение `.exe` врёт: это 7 КБ статического stripped **ELF** в том же
-  рукописном syscall-стиле, что [`05-Reverse`](../05-Reverse/) и
+- Расширение `.exe` оказалось обманом: это 7 КБ статического stripped **ELF** в
+  том же рукописном syscall-стиле, что [`05-Reverse`](../05-Reverse/) и
   [`06-Reverse`](../06-Reverse/) того же автора. Примечание про «Windows sandbox»
-  — отвлекающий манёвр, запускать не нужно ничего.
+  я прочитал как отвлекающий манёвр — запускать не нужно ничего.
 - В записи два пакета по петле:
 
 ```
@@ -207,7 +197,7 @@ strings -n 5 BlackFrost.exe
 
 ## 3. Путь исследования
 
-**Подтверждено**
+**Что я подтвердил**
 
 - По адресу `0x1400012B6` `argv[1]` хешируется через FNV-1a 32 и сравнивается с
   `0xB700B632` — ровно то значение, которое клиент отправляет в
@@ -234,27 +224,17 @@ plain[n] = cipher[n] ^ (hash >> (8 * (n & 3))) ^ ((90 + 17 * n) & 0xFF)
   `.rodata` по VA `0x140003080` авторским бегущим XOR-ом (старт `0x26`, шаг
   `0x1A`, чётный байт пары против `key - 0x0D`) и печатает его через `WriteFile`.
 
-**Ключевая идея**
+**Идея, которая решила задачу**
 
-- Константа в бинаре, дословно встречающаяся в трафике, означает, что ключевой
-  материал уже есть в записи. Сверяйте строки из pcap с непосредственными
-  значениями из дизассемблера раньше, чем планировать динамику.
-
-**Ложный след**
-
-- Диапазон `0x140001394`–`0x140001501` — плотный SSE-цикл, расшифровывающий
-  56-байтный блоб `.rdata` тем же хешем, дописывающий три байта из `ebp` и
-  проверяющий `strlen < 0x17`. Он расположен и размерен так, чтобы выглядеть
-  полезной нагрузкой, и встречается *раньше* настоящей процедуры — но принадлежит
-  ветке `stage unpack failed` и расшифровывается в шум. (SSE-блок по
-  `0x140001A7E` — тоже не криптография, а hex-кодировщик, собирающий
-  `BFHELLO <hash>\n`.)
-
-**Осталось проверить**
-
-- Значение `--token`, дающее FNV-1a `0xB700B632`, не искалось. Оно не требуется,
-  а 32-битный FNV тривиально коллизионен, так что найденный токен всё равно вряд
-  ли совпал бы с авторским.
+- Константа в бинаре, дословно встречающаяся в трафике, сказала мне, что ключевой
+  материал уже есть в записи. Я сверил строки из pcap с непосредственными
+  значениями из дизассемблера раньше, чем планировать динамику, поэтому значение
+  `--token`, дающее FNV-1a `0xB700B632`, мне искать не пришлось. (Один участок
+  пришлось отбросить: `0x140001394`–`0x140001501` — плотный SSE-цикл,
+  расшифровывающий 56-байтный блоб `.rdata` тем же хешем и стоящий *раньше*
+  настоящей процедуры, но он принадлежит ветке `stage unpack failed` и
+  расшифровывается в шум. SSE-блок по `0x140001A7E` — тоже не криптография, а
+  hex-кодировщик, собирающий `BFHELLO <hash>\n`.)
 
 ## 4. Инструменты и команды
 
@@ -279,13 +259,14 @@ python3 solve.py --token 'some-candidate'   # посчитать хеш канд
 
 ## 5. Пошаговое решение
 
-1. `file` → «`.exe`» на деле статический stripped ELF; смотрим pcap на 304 байта через `xxd`.
-2. Читаем два TCP-пейлоада → `BFHELLO b700b632` и `BF2:<hex>`.
-3. Дизассемблируем `.text`; находим сравнение FNV-1a с `0xB700B632`.
-4. Сопоставляем константу с рукопожатием → хеш доступен без токена.
-5. Каталогизируем и отбрасываем антианализ и SSE-блоб-приманку.
-6. Расшифровываем payload: `cipher[n] ^ (hash >> 8*(n&3)) ^ (90 + 17n)`.
-7. Декодируем блоб флага по VA `0x140003080`, 34 байта, старт `0x26`.
+1. `file` показал, что «`.exe`» на деле статический stripped ELF; посмотрел pcap
+   на 304 байта через `xxd`.
+2. Прочитал два TCP-пейлоада → `BFHELLO b700b632` и `BF2:<hex>`.
+3. Дизассемблировал `.text` и нашёл сравнение FNV-1a с `0xB700B632`.
+4. Сопоставил константу с рукопожатием → хеш доступен без токена.
+5. Каталогизировал и отбросил антианализ и SSE-блоб-приманку.
+6. Расшифровал payload: `cipher[n] ^ (hash >> 8*(n&3)) ^ (90 + 17n)`.
+7. Декодировал блоб флага по VA `0x140003080`, 34 байта, старт `0x26`.
 
 ## 6. Итоговое решение
 
@@ -300,7 +281,7 @@ SUCCESS flag = THJCC{blackfrost_config_recovered}
 SUCCESS matches the known-good config and flag
 ```
 
-Ничего не запускалось: ни Windows-песочницы, ни replay-сервера на порту 31337.
+Я ничего не запускал: ни Windows-песочницы, ни replay-сервера на порту 31337.
 
 ## 7. Флаг
 
@@ -315,10 +296,8 @@ THJCC{blackfrost_config_recovered}
   запись трафика утекает ключ, и секрет перестаёт иметь значение.
 - **Почему сработало:** поточный шифр — побайтовый XOR трёх известных слагаемых:
   шифртекста, поворота хеша и позиционно-зависимой добавки. Полностью офлайн.
-- **Ложные следы:** указание «тестировать в Windows-песочнице» на файле, который
-  не является PE, и 56-байтный SSE-блоб-приманка из ветки `stage unpack failed`.
-  Если расшифровка даёт шум, проверьте, нет ли у этой ветки собственной строки
-  ошибки: у приманок она обычно есть.
-- **Как узнать в следующий раз:** имплант + pcap → восстановить расписание ключей
-  из рукопожатия, затем искать блоб `.rodata` длиной с флаг. Запуск образца —
-  последнее средство, а не первый шаг.
+- **Что запомню:** имплант + pcap → восстановить расписание ключей из
+  рукопожатия, затем искать блоб `.rodata` длиной с флаг. Запуск образца —
+  последнее средство, а не первый шаг. (Когда расшифровка даёт шум, я проверяю,
+  нет ли у этой ветки собственной строки ошибки: у приманок она обычно есть, —
+  так я и понял, что 56-байтный SSE-блоб из ветки `stage unpack failed`.)

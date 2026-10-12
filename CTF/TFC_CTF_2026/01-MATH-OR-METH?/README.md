@@ -11,7 +11,7 @@
 
 ## 1. Description
 
-We are given the source `chall.py` and its printed `output.py`. The flag is
+I was given the source `chall.py` and its printed `output.py`. The flag is
 encoded as digits, hidden as **one row** of a small random matrix, and only a
 secret mod-`p` linear combination of the rows is published.
 
@@ -44,33 +44,33 @@ vector of `m = 88` small digits in `[0, 33)`. One of those rows is the flag.
 
 ## 2. Initial analysis
 
-Confirmed facts from `output.py`:
+What I confirmed from `output.py`:
 
 - `n = 57`, `m = 88`, `B = 32` (`base = 33`), `p` is a 1084-bit prime.
 - `h` is a length-88 vector over `Z_p`.
 
-`h` lies in the **integer row span (mod p) of a matrix with tiny entries**.
-This is the textbook setup for an **orthogonal lattice attack** (Nguyen–Stern
-hidden subset-sum family): vectors orthogonal to all the small rows over `Z`
-are automatically orthogonal to `h` mod `p`, and they are short, so lattice
-reduction isolates them.
+I recognised that `h` lies in the **integer row span (mod p) of a matrix with
+tiny entries** — the textbook setup for an **orthogonal lattice attack**
+(Nguyen–Stern hidden subset-sum family): vectors orthogonal to all the small
+rows over `Z` are automatically orthogonal to `h` mod `p`, and they are short,
+so lattice reduction isolates them.
 
 ## 3. Investigation path
 
-1. Build the lattice `Λ = { u ∈ Z^m : ⟨u, h⟩ ≡ 0 (mod p) }`, reduce it (LLL).
-   The reduced basis splits cleanly: exactly `m − n = 31` genuinely short
+1. I built the lattice `Λ = { u ∈ Z^m : ⟨u, h⟩ ≡ 0 (mod p) }` and reduced it
+   (LLL). The reduced basis split cleanly: exactly `m − n = 31` genuinely short
    vectors (they span `L_A^⊥`, orthogonal to every matrix row) and the rest
-   are `~p`-scale. The sharp norm gap confirms the structure.
-2. Take the orthogonal complement of those 31 vectors → recover `L_A`, the
+   were `~p`-scale. The sharp norm gap confirmed the structure for me.
+2. I took the orthogonal complement of those 31 vectors → recovered `L_A`, the
    rank-`n = 57` integer lattice spanned by the matrix rows.
-3. **Key subtlety:** the rows (norm ≈ 175, all entries in `[0, 33)`) are **not**
-   the shortest vectors of `L_A` — their pairwise differences are shorter
-   (≈ 102), so plain LLL/BKZ returns mixed-sign junk, not the rows. But every
-   row lives inside the box `[0, 33)^m` and sits ~90 from the box centre
-   `(16, …, 16)`. So enumerate lattice points near the centre (Fincke–Pohst
-   CVP enumeration) — that returns exactly the 57 rows.
-4. Decode each row as base-33 little-endian → `bytes_to_long` inverse. Only the
-   planted row decodes to readable ASCII.
+3. **The subtlety I had to get right:** the rows (norm ≈ 175, all entries in
+   `[0, 33)`) are **not** the shortest vectors of `L_A` — their pairwise
+   differences are shorter (≈ 102), so plain LLL/BKZ returned mixed-sign junk,
+   not the rows. But every row lives inside the box `[0, 33)^m` and sits ~90
+   from the box centre `(16, …, 16)`, so I enumerated lattice points near the
+   centre (Fincke–Pohst CVP enumeration) — that returned exactly the 57 rows.
+4. I decoded each row as base-33 little-endian → `bytes_to_long` inverse. Only
+   the planted row decoded to readable ASCII.
 
 ## 4. Tools & commands
 
@@ -86,19 +86,19 @@ Solve script: [`flag_detected.py`](flag_detected.py).
 
 ## 5. Step-by-step
 
-1. Parse `n, m, B, p, h` from `output.py`.
+1. I parsed `n, m, B, p, h` from `output.py`.
 2. `orthogonal_lattice(h, p)` → basis of `Λ`; `LLL.reduction` → sort by norm →
-   take the `m − n = 31` shortest = `L_A^⊥`.
-3. `recover_row_lattice` → embed `[ I_m | 2^60·W^T ]`, LLL, keep rows with a
-   zeroed tail = `L_A` (rank 57).
+   I took the `m − n = 31` shortest = `L_A^⊥`.
+3. `recover_row_lattice` → I embedded `[ I_m | 2^60·W^T ]`, ran LLL, kept rows
+   with a zeroed tail = `L_A` (rank 57).
 4. `box_lattice_points` → LLL+BKZ `L_A`, then Fincke–Pohst enumeration of all
    lattice points within radius 140 of `(16, …, 16)`, filtered to `[0, 33)^m`.
-5. `decode_row` each candidate; the one that is printable ASCII is the message.
-   `chall.py` says to place it in `TFCCTF{}`.
+5. I ran `decode_row` on each candidate; the one that is printable ASCII is the
+   message. `chall.py` says to place it in `TFCCTF{}`.
 
 ## 6. Solution
 
-Running the script recovers the planted row, which decodes to
+When I ran the script it recovered the planted row, which decodes to
 `this_is_a_very_very_long_flag_for_a_short_ctf_chall_ggs`, and `chall.py`
 instructs to wrap the message in `TFCCTF{}`.
 
@@ -119,18 +119,19 @@ Status: ✅ **confirmed**.
 
 ## 8. Key takeaways
 
-- **Signal to the right hypothesis:** `output = secret linear combination of
-  small (0..B) vectors mod a large prime`, with a meaningful vector hidden
-  among random ones → orthogonal lattice attack. The clean norm gap at index
-  `m − n` after the first LLL is the confirmation you are on track.
-- **False trail / time sink:** reducing `L_A` directly and expecting the rows to
-  pop out. With `B > 1` the lattice minima are row *differences* (mixed signs),
-  not the rows. Don't chase shortest vectors — the rows are box-constrained
-  non-negative points, so switch to CVP enumeration around the box centre.
+- **What pointed me to the right hypothesis:** `output = secret linear
+  combination of small (0..B) vectors mod a large prime`, with a meaningful
+  vector hidden among random ones → orthogonal lattice attack. The clean norm
+  gap at index `m − n` after the first LLL told me I was on track.
+- **Where I could have lost time:** reducing `L_A` directly and expecting the
+  rows to pop out. With `B > 1` the lattice minima are row *differences* (mixed
+  signs), not the rows, so I stopped chasing shortest vectors — the rows are
+  box-constrained non-negative points, and I switched to CVP enumeration around
+  the box centre.
 - **If `B = 1`** (0/1 vectors) the rows themselves are the shortest vectors and
   plain Nguyen–Stern finishes; the extra CVP step is only needed for `B > 1`.
-- **Recognising this class in future:** any "hidden subset sum" / small-matrix
-  mod-`p` combination. Recipe: `Λ` orthogonal-mod-`p` → LLL → gap at `m − n` →
+- **What I'll remember:** any "hidden subset sum" / small-matrix mod-`p`
+  combination. My recipe: `Λ` orthogonal-mod-`p` → LLL → gap at `m − n` →
   orthogonal complement → recover the small vectors (shortest for 0/1, box CVP
   otherwise).
 
@@ -148,7 +149,7 @@ Status: ✅ **confirmed**.
 
 ## 1. Условие
 
-Даны исходник `chall.py` и его вывод `output.py`. Флаг кодируется в цифры,
+Мне дали исходник `chall.py` и его вывод `output.py`. Флаг кодируется в цифры,
 прячется как **одна строка** небольшой случайной матрицы, а публикуется лишь
 секретная линейная комбинация строк по модулю `p`.
 
@@ -181,33 +182,33 @@ h = [sum(a[i] * A[i][j] for i in range(n)) % p for j in range(m)]  # публи�
 
 ## 2. Первичный анализ
 
-Подтверждено из `output.py`:
+Что я подтвердил из `output.py`:
 
 - `n = 57`, `m = 88`, `B = 32` (`base = 33`), `p` — простое на 1084 бита.
 - `h` — вектор длины 88 над `Z_p`.
 
-`h` лежит в **целочисленной оболочке строк (mod p) матрицы с крошечными
-элементами**. Это классическая постановка для **orthogonal lattice attack**
-(семейство Nguyen–Stern / hidden subset-sum): векторы, ортогональные всем малым
-строкам над `Z`, автоматически ортогональны `h` по модулю `p` и при этом
-короткие — редукция решётки их выделяет.
+Я распознал, что `h` лежит в **целочисленной оболочке строк (mod p) матрицы с
+крошечными элементами** — классическая постановка для **orthogonal lattice
+attack** (семейство Nguyen–Stern / hidden subset-sum): векторы, ортогональные
+всем малым строкам над `Z`, автоматически ортогональны `h` по модулю `p` и при
+этом короткие — редукция решётки их выделяет.
 
 ## 3. Путь исследования
 
-1. Строим решётку `Λ = { u ∈ Z^m : ⟨u, h⟩ ≡ 0 (mod p) }`, редуцируем (LLL).
-   Базис делится чётко: ровно `m − n = 31` действительно коротких вектора (они
-   натягивают `L_A^⊥`, ортогональный каждой строке матрицы), остальные —
-   масштаба `~p`. Резкий разрыв норм подтверждает структуру.
-2. Берём ортогональное дополнение к этим 31 векторам → восстанавливаем `L_A` —
+1. Я построил решётку `Λ = { u ∈ Z^m : ⟨u, h⟩ ≡ 0 (mod p) }` и редуцировал (LLL).
+   Базис разделился чётко: ровно `m − n = 31` действительно коротких вектора
+   (они натягивают `L_A^⊥`, ортогональный каждой строке матрицы), остальные —
+   масштаба `~p`. Резкий разрыв норм подтвердил мне структуру.
+2. Я взял ортогональное дополнение к этим 31 векторам → восстановил `L_A` —
    решётку ранга `n = 57`, натянутую на строки матрицы.
-3. **Ключевой нюанс:** строки (норма ≈ 175, все элементы в `[0, 33)`) — **не**
-   кратчайшие векторы `L_A`: их попарные разности короче (≈ 102), поэтому
-   обычный LLL/BKZ выдаёт мусор со смешанными знаками, а не строки. Но каждая
-   строка лежит в кубе `[0, 33)^m` и отстоит на ~90 от центра куба
-   `(16, …, 16)`. Значит, перечисляем точки решётки рядом с центром
-   (Fincke–Pohst CVP enumeration) — получаем ровно 57 строк.
-4. Декодируем каждую строку как base-33 little-endian → обратно в байты. Только
-   подсаженная строка декодируется в читаемый ASCII.
+3. **Нюанс, который пришлось учесть:** строки (норма ≈ 175, все элементы в
+   `[0, 33)`) — **не** кратчайшие векторы `L_A`: их попарные разности короче
+   (≈ 102), поэтому обычный LLL/BKZ выдавал мусор со смешанными знаками, а не
+   строки. Но каждая строка лежит в кубе `[0, 33)^m` и отстоит на ~90 от центра
+   куба `(16, …, 16)`, поэтому я перечислил точки решётки рядом с центром
+   (Fincke–Pohst CVP enumeration) — получил ровно 57 строк.
+4. Я декодировал каждую строку как base-33 little-endian → обратно в байты.
+   Только подсаженная строка декодировалась в читаемый ASCII.
 
 ## 4. Инструменты и команды
 
@@ -223,20 +224,20 @@ Solve-скрипт: [`flag_detected.py`](flag_detected.py).
 
 ## 5. Пошаговое решение
 
-1. Парсим `n, m, B, p, h` из `output.py`.
-2. `orthogonal_lattice(h, p)` → базис `Λ`; `LLL.reduction` → сортируем по норме →
-   берём `m − n = 31` кратчайших = `L_A^⊥`.
-3. `recover_row_lattice` → embedding `[ I_m | 2^60·W^T ]`, LLL, оставляем строки
-   с занулённым хвостом = `L_A` (ранг 57).
+1. Я распарсил `n, m, B, p, h` из `output.py`.
+2. `orthogonal_lattice(h, p)` → базис `Λ`; `LLL.reduction` → сортировка по норме →
+   я взял `m − n = 31` кратчайших = `L_A^⊥`.
+3. `recover_row_lattice` → я сделал embedding `[ I_m | 2^60·W^T ]`, прогнал LLL,
+   оставил строки с занулённым хвостом = `L_A` (ранг 57).
 4. `box_lattice_points` → LLL+BKZ по `L_A`, затем перечисление Fincke–Pohst всех
    точек решётки в радиусе 140 от `(16, …, 16)`, отфильтрованных по `[0, 33)^m`.
-5. `decode_row` каждого кандидата; читаемый ASCII — это сообщение. `chall.py`
-   велит поместить его в `TFCCTF{}`.
+5. Я прогнал `decode_row` на каждом кандидате; читаемый ASCII — это сообщение.
+   `chall.py` велит поместить его в `TFCCTF{}`.
 
 ## 6. Итоговое решение
 
-Скрипт восстанавливает подсаженную строку, которая декодируется в
-`this_is_a_very_very_long_flag_for_a_short_ctf_chall_ggs`, а `chall.py`
+Когда я запустил скрипт, он восстановил подсаженную строку, которая декодируется
+в `this_is_a_very_very_long_flag_for_a_short_ctf_chall_ggs`, а `chall.py`
 предписывает обернуть сообщение в `TFCCTF{}`.
 
 ```
@@ -256,18 +257,18 @@ TFCCTF{this_is_a_very_very_long_flag_for_a_short_ctf_chall_ggs}
 
 ## 8. Ключевые выводы
 
-- **Сигнал к правильной гипотезе:** `вывод = секретная линейная комбинация малых
-  (0..B) векторов по модулю большого простого`, с осмысленным вектором среди
-  случайных → orthogonal lattice attack. Чёткий разрыв норм на индексе `m − n`
-  после первого LLL — подтверждение, что путь верный.
-- **Ложный след / потеря времени:** редуцировать `L_A` напрямую и ждать, что
-  строки «всплывут». При `B > 1` минимумы решётки — это *разности* строк
-  (смешанные знаки), а не сами строки. Не гоняйся за кратчайшими векторами —
-  строки это неотрицательные точки в кубе, поэтому переходим к CVP-перечислению
+- **Что навело меня на верную гипотезу:** `вывод = секретная линейная комбинация
+  малых (0..B) векторов по модулю большого простого`, с осмысленным вектором
+  среди случайных → orthogonal lattice attack. Чёткий разрыв норм на индексе
+  `m − n` после первого LLL сказал мне, что путь верный.
+- **Где я мог потерять время:** редуцировать `L_A` напрямую и ждать, что строки
+  «всплывут». При `B > 1` минимумы решётки — это *разности* строк (смешанные
+  знаки), а не сами строки, поэтому я перестал гоняться за кратчайшими векторами
+  — строки это неотрицательные точки в кубе, и я перешёл к CVP-перечислению
   вокруг центра куба.
 - **Если `B = 1`** (0/1 векторы), строки сами — кратчайшие векторы, и хватает
   чистого Nguyen–Stern; дополнительный CVP-шаг нужен только при `B > 1`.
-- **Как распознать в будущем:** любая «hidden subset sum» / комбинация малой
-  матрицы по модулю `p`. Рецепт: `Λ` ортогонально-mod-`p` → LLL → разрыв на
-  `m − n` → ортогональное дополнение → восстановить малые векторы (кратчайшие
-  для 0/1, box-CVP иначе).
+- **Что запомню:** любая «hidden subset sum» / комбинация малой матрицы по
+  модулю `p`. Мой рецепт: `Λ` ортогонально-mod-`p` → LLL → разрыв на `m − n` →
+  ортогональное дополнение → восстановить малые векторы (кратчайшие для 0/1,
+  box-CVP иначе).

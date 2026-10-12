@@ -19,7 +19,8 @@ One attachment: `usb_capture.pcap`.
 
 ## 2. Initial analysis
 
-The "cable" is the hint — this is a USB bus dump, not network traffic:
+The "cable" in the prompt was my hint — I treated this as a USB bus dump, not
+network traffic:
 
 ```bash
 file usb_capture.pcap          # pcap capture file, microsecond ts (little-endian)
@@ -31,7 +32,8 @@ file usb_capture.pcap          # pcap capture file, microsecond ts (little-endia
   **8-byte USB HID keyboard report**.
 - **Confirmed:** **50 packets** — press/release pairs, so ~25 real keystrokes.
 
-So this is a keystroke-recovery task: decode the HID reports back into text.
+So I was looking at a keystroke-recovery task: decode the HID reports back into
+text.
 
 ## 3. Investigation path
 
@@ -43,7 +45,7 @@ USB HID boot-keyboard report (8 bytes):
 | 1 | reserved |
 | 2..7 | up to 6 pressed key usage-ids (`0x00` = none) |
 
-**Confirmed** rules used while walking the reports:
+The rules I confirmed while walking the reports:
 
 - `key == 0` → key-release / empty report → skip (why 50 packets → ~25 chars).
 - `key == 0x28` → Enter, `key == 0x2A` → Backspace.
@@ -51,7 +53,7 @@ USB HID boot-keyboard report (8 bytes):
   `modifier & 0x22` — this is what produces `{`, `}`, `_` (Shift+`[`, Shift+`]`,
   Shift+`-`). The body is lowercase leet, so no shift is held there.
 
-Mapping the sequence in order yields the flag directly.
+Mapping the sequence in order gave me the flag directly.
 
 ## 4. Tools & commands
 
@@ -70,14 +72,14 @@ python3 solve.py usb_capture.pcap
 
 ## 5. Step-by-step
 
-1. Read the 24-byte pcap global header, detect endianness from the magic, note
-   link type 220.
-2. Iterate 16-byte record headers + payloads to get all 50 packets.
-3. For each packet, slice the HID report at `payload[64:72]`.
-4. Read `modifier = report[0]`, `key = report[2]`.
-5. Skip `key == 0`; handle Enter/Backspace; otherwise map `key` via the HID
-   table, applying shift when `modifier & 0x22`.
-6. Concatenate the characters → flag.
+1. I read the 24-byte pcap global header, detected the endianness from the
+   magic and noted link type 220.
+2. I iterated the 16-byte record headers + payloads to get all 50 packets.
+3. For each packet I sliced the HID report at `payload[64:72]`.
+4. I read `modifier = report[0]` and `key = report[2]`.
+5. I skipped `key == 0`, handled Enter/Backspace, and otherwise mapped `key`
+   via the HID table, applying shift when `modifier & 0x22`.
+6. I concatenated the characters → flag.
 
 ## 6. Solution
 
@@ -137,7 +139,8 @@ THJCC{hid_k3y5tr0k3_l34k}
 
 ## 2. Первичный анализ
 
-«Кабель» — подсказка: это дамп шины USB, а не сетевой трафик:
+«Кабель» в условии стал мне подсказкой: я воспринял это как дамп шины USB, а не
+сетевой трафик:
 
 ```bash
 file usb_capture.pcap          # pcap capture file, microsecond ts (little-endian)
@@ -150,8 +153,8 @@ file usb_capture.pcap          # pcap capture file, microsecond ts (little-endia
 - **Подтверждено:** **50 пакетов** — пары нажатие/отпускание, то есть ~25
   реальных нажатий.
 
-Значит задача на восстановление нажатий: раскодировать HID-репорты обратно в
-текст.
+Значит, передо мной задача на восстановление нажатий: раскодировать HID-репорты
+обратно в текст.
 
 ## 3. Путь исследования
 
@@ -163,7 +166,7 @@ HID boot-репорт клавиатуры (8 байт):
 | 1 | зарезервировано |
 | 2..7 | до 6 нажатых key usage-id (`0x00` = нет) |
 
-**Подтверждённые** правила при обходе репортов:
+Правила, которые я подтвердил при обходе репортов:
 
 - `key == 0` → отпускание / пустой репорт → пропуск (поэтому 50 пакетов → ~25
   символов).
@@ -172,7 +175,7 @@ HID boot-репорт клавиатуры (8 байт):
   именно так получаются `{`, `}`, `_` (Shift+`[`, Shift+`]`, Shift+`-`). Тело —
   lowercase-leet, там shift не зажат.
 
-Последовательность по порядку сразу складывается во флаг.
+Последовательность по порядку сразу сложилась во флаг.
 
 ## 4. Инструменты и команды
 
@@ -191,14 +194,14 @@ python3 solve.py usb_capture.pcap
 
 ## 5. Пошаговое решение
 
-1. Читаем 24-байтовый глобальный заголовок pcap, определяем порядок байт по
-   magic, фиксируем тип канала 220.
-2. Идём по 16-байтовым заголовкам записей и данным — получаем все 50 пакетов.
-3. Для каждого пакета берём HID-репорт как `payload[64:72]`.
-4. Читаем `modifier = report[0]`, `key = report[2]`.
-5. Пропускаем `key == 0`; обрабатываем Enter/Backspace; иначе мапим `key` по
+1. Прочитал 24-байтовый глобальный заголовок pcap, определил порядок байт по
+   magic и зафиксировал тип канала 220.
+2. Прошёл по 16-байтовым заголовкам записей и данным и получил все 50 пакетов.
+3. Для каждого пакета взял HID-репорт как `payload[64:72]`.
+4. Прочитал `modifier = report[0]` и `key = report[2]`.
+5. Пропускал `key == 0`, обрабатывал Enter/Backspace, иначе мапил `key` по
    HID-таблице с учётом shift при `modifier & 0x22`.
-6. Склеиваем символы → флаг.
+6. Склеил символы → флаг.
 
 ## 6. Итоговое решение
 
